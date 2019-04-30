@@ -101,20 +101,7 @@ matrix_ordering = matrix_ordering[:,end:-1:1]
 # 2. Compute edge density (used later as abscissa)
 # 3. Compute Betti number (used later as ordinate)
 
-# %%
-using ComputationalHomology
 
-
-
-# %%
-X = rand(3,10); # generate dataset
-cplx, w = vietorisrips(random_points, 0.4, true) # generate Vietoris-Rips (VR) complex
-flt = filtration(cplx, w) # construct filtration complex from VR complex
-ph = persistenthomology(flt) # create persistent homology object with specific computation method
-
-# %%
-
-group(ph, 1)
 
 
 
@@ -162,6 +149,7 @@ end
 
 
 # %%
+# Determine which graph shpuld be displayed
 n=300
 
 nodelabel = [r  for r in 1:nv(set_of_graphs[n])]
