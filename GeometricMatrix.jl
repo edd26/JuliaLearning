@@ -1,3 +1,8 @@
+using Distances
+    using DataFrames
+    using Random
+    using LightGraphs
+    using GraphPlot
 
 # module GeometricMatrix
 #
@@ -16,7 +21,7 @@ function generate_geometric_matrix(random_points)
     return -geometric_matrix
 end
 
-function generate_matrix_ordering(geometric_matrix)
+function generate_matrix_ordering(geometric_matrix, N)
     elemnts_above_diagonal = Int((N^2-N)/2)
     matrix_ordering = zeros(Int, 2,elemnts_above_diagonal)
 
@@ -39,7 +44,31 @@ function generate_matrix_ordering(geometric_matrix)
 
     return matrix_ordering
 end
-# 
+
+function generate_set_of_graphs(N, matrix_ordering)
+    vetrices = N
+    edges = matrix_ordering
+    num_of_edges = size(edges)[2]
+
+    set_of_graphs = [a=Graph(vetrices) for a=1:num_of_edges]
+    edges_counter = zeros(Int, num_of_edges)
+    edge_density =  zeros(num_of_edges)
+
+    k=1
+    for k in range(1,stop=num_of_edges)~
+        add_edge!(set_of_graphs[k], edges[1,k], edges[2,k]);
+        edges_counter[k] = ne(set_of_graphs[k])
+        edge_density[k] = edges_counter[k]/binomial(N,2)
+
+
+
+        if k<num_of_edges # if is used to eliminate copying at last iteration
+            set_of_graphs[k+1] = copy(set_of_graphs[k])
+        end
+    end
+    return set_of_graphs
+end
+#
 # end
 #
 # push!(LOAD_PATH, "home/ed19aaf/Programming/Julia/JuliaLearning")
