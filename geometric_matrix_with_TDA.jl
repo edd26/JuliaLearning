@@ -22,8 +22,9 @@ include("GeometricMatrix.jl")
 #  each row n is set of coordinates of all points in the n-th dimension
 
 
-
-random_points = generate_random_point_cloud(12,3)
+N = 12
+dimensions = 3
+random_points = generate_random_point_cloud(N, dimensions)
 # ### Computing inverse of distance between points stored in "random_points"
 # A sibstitute for correlatioin matrix
 
@@ -40,7 +41,7 @@ geometric_matrix = generate_geometric_matrix(random_points)
 
 
 
-matrix_ordering =  generate_matrix_ordering(geometric_matrix)
+matrix_ordering =  generate_matrix_ordering(geometric_matrix, N)
 
 # %% markdown
 # # At his point, input matrix is assumed to be settled (either random, geometric or correaltion)
