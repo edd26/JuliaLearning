@@ -107,4 +107,4 @@ using TDA, ComputationalHomology, Plots
     # plot nerve
     plot!(cplx, D, linewidth = 2) # or plot(cplx)
 
-ComputationalHomology.
+# ComputationalHomology.
