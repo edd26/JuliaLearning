@@ -4,6 +4,8 @@ using Distances
     using Random
     using LightGraphs
     using GraphPlot
+
+include("GeometricMatrix.jl")
 # using Graphs
 
 # using Eirene
@@ -19,20 +21,13 @@ using Distances
 # Each column is a set of coordinates for a point,
 #  each row n is set of coordinates of all points in the n-th dimension
 
-function generate_random_point_cloud(number_of_points = 12, dimensions=2)
-    N = number_of_points
-    random_points = rand(Float64, dimensions, N)
-    return random_points
-end
+
 
 random_points = generate_random_point_cloud(12,3)
 # ### Computing inverse of distance between points stored in "random_points"
 # A sibstitute for correlatioin matrix
 
-function generate_geometric_matrix(random_points)
-    geometric_matrix = pairwise(Euclidean(), random_points, dims=2)
-    return -geometric_matrix
-end
+
 
 geometric_matrix = generate_geometric_matrix(random_points)
 
@@ -43,29 +38,7 @@ geometric_matrix = generate_geometric_matrix(random_points)
 # First element in final "matrix ordering" is of points with smallest distance.
 # (The indexing is inversed in comparison to the article)
 
-function generate_matrix_ordering(geometric_matrix)
-    elemnts_above_diagonal = Int((N^2-N)/2)
-    matrix_ordering = zeros(Int, 2,elemnts_above_diagonal)
 
-    A = copy(geometric_matrix)
-
-    for element in 1:elemnts_above_diagonal
-    #     Find maximal distance
-        minimal_value = findmin(A)
-    #     Get the coordinates (only 2 dimensions, because it is distance matrix)
-        matrix_ordering[1,element] = Int(minimal_value[2][1])
-        matrix_ordering[2,element] = Int(minimal_value[2][2])
-    #
-    # #     Zero minval in A (above and below diagonal) so next minval can be found
-        A[matrix_ordering[1,element], matrix_ordering[2,element]] = 0.0
-        A[matrix_ordering[2,element], matrix_ordering[1,element]] = 0.0
-    end
-
-    # change from min to max order to the max to min order (? necessary ?)
-    matrix_ordering = matrix_ordering[:,end:-1:1]
-
-    return matrix_ordering
-end
 
 matrix_ordering =  generate_matrix_ordering(geometric_matrix)
 
@@ -76,9 +49,6 @@ matrix_ordering =  generate_matrix_ordering(geometric_matrix)
 # 1. Compute simplicial homology groups of the taken (i+1)-clique
 # 2. Compute edge density (used later as abscissa)
 # 3. Compute Betti number (used later as ordinate)
-
-
-
 
 
 #= Utilization of ordering matrix -> create zero matrix called filter of size of
