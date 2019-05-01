@@ -1,0 +1,12 @@
+packages for julia:
+
+DataFrames
+Plots
+WebIO
+LightGraphs
+GraphPlot
+Eirene
+Distances
+
+nb extensions for jupyter notebook
+
