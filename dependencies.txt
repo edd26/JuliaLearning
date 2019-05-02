@@ -1,4 +1,7 @@
-packages for julia:
+For MATLAB package:
+sudo apt-get install csh
+
+Packages for julia:
 
 DataFrames
 Plots
@@ -7,6 +10,8 @@ LightGraphs
 GraphPlot
 Eirene
 Distances
+MATLAB
 
-nb extensions for jupyter notebook
-
+If the graphs are not displayed in the jupyter notebook,
+nb extensions
+should be installed with the WebIO extension.
