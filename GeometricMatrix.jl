@@ -66,7 +66,7 @@ function generate_set_of_graphs(N, matrix_ordering)
             set_of_graphs[k+1] = copy(set_of_graphs[k])
         end
     end
-    return set_of_graphs
+    return set_of_graphs, edge_density
 end
 #
 # end
