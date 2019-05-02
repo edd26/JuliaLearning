@@ -10,6 +10,12 @@ function plot_betti_numbers(betti_numbers, title="Geometric  matrix")
     plot!(x_values, betti_numbers[:,3], label="beta_2")
 end
 
+function save_matrix_to_file(matrix, filename)
+    open(filename, "w") do io
+        writedlm(io,  matrix, ',')
+    end
+end
+
 
 geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
  shuffeled_matrix = readdlm( "shuffeled_matrix.csv",  ',', Float64, '\n')
@@ -27,10 +33,9 @@ println("Computing betti numbers for shuffled matrix with $(ending)x$ending matr
  mat"$shuf_betti_numbers = compute_clique_topology($shuffeled_matrix(1:$ending, 1:$ending), 'Algorithm', 'split');"
 
 
-writedlm("geometric_betties_$ending.csv",  geom_betti_numbers, ',')
-writedlm("random_betties_$ending.csv",  rand_betti_numbers, ',')
-writedlm("shuffled_betties_$ending.csv",  shuf_betti_numbers, ',')
-
+save_matrix_to_file(geom_betti_numbers, "geometric_betties_$ending.csv")
+save_matrix_to_file(rand_betti_numbers, "random_betties_$ending.csv")
+save_matrix_to_file(shuf_betti_numbers, "shuffled_betties_$ending.csv")
 
 plot_betti_numbers(geom_betti_numbers, "Geometric  matrix, matrix size $ending")
 plot_betti_numbers(rand_betti_numbers, "Random  matrix, matrix size $ending")
