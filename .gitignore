@@ -25,3 +25,6 @@ Manifest.toml
 
 # Jupyter notebook checkpoints
 *.ipynb_checkpoints
+
+# Ignore saved csv files
+*.csv
