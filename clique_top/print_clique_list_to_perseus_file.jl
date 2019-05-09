@@ -1,6 +1,4 @@
-function [ ] = print_clique_list_to_perseus_file( cliques, fid, filtration )
-
-% ----------------------------------------------------------------
+#=----------------------------------------------------------------
 % PRINT CLIQUE LIST TO PERSEUS FILE
 % written by Chad Giusti, 6/2014
 %
@@ -15,14 +13,17 @@ function [ ] = print_clique_list_to_perseus_file( cliques, fid, filtration )
 %   fid: file into which to print the cliques
 %   filtration: filtration number with which to tag these cliques
 %
-% ----------------------------------------------------------------
+% ---------------------------------------------------------------- =#
+function print_clique_list_to_perseus_file(cliques, filePrefix, filtration)
 
-for j=1:length(cliques)
-    fprintf(fid, sprintf('%i ', size(cliques{j},2)-1));
-    for k=1:(size(cliques{j},2))
-        fprintf(fid, '%i ', cliques{j}(k));
+    open("$(filePrefix)_simplices.txt", "a") do cliqueFid
+        for j=1:length(cliques)
+            write(cliqueFid,"$(size(cliques{j},2)-1))")
+            for k=1:(size(cliques{j},2))
+                write(cliqueFid,"$(cliques{j}(k))")
+            end
+            write(cliqueFid,"$(filtration)\n")
+        end
+
     end
-    fprintf(fid, sprintf('%i\n',filtration));
-end
-
 end

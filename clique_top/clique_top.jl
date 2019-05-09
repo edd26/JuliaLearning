@@ -79,7 +79,7 @@ BASED ON THE:
 %
 % ----------------------------------------------------------------
 =#
-function compute_clique_topology (inputMatrix,
+function compute_clique_topology(inputMatrix;
                                     reportProgress = false,
                                     maxBettiNumber = 3,
                                     edgeDensity = .6,
@@ -91,47 +91,48 @@ function compute_clique_topology (inputMatrix,
                                     algorithm = "naive",
                                     threads = 1)
 
-# For testing only:
-using MATLAB
- using DelimitedFiles
- using Plots
-
- function plot_betti_numbers(betti_numbers, title="Geometric  matrix")
-    x_values = range(0,stop=0.6,length=size(betti_numbers)[1])
-
-    plot(x_values, betti_numbers[:,1], label="beta_0", title=title) #, ylims = (0,maxy)
-    plot!(x_values, betti_numbers[:,2], label="beta_1")
-    plot!(x_values, betti_numbers[:,3], label="beta_2")
- end
-
- function save_matrix_to_file(matrix, filename)
-    open(filename, "w") do io
-        writedlm(io,  matrix, ",")
-    end
- end
-
-
- geometric_matrix = readdlm( "geometric_matrix.csv",  ",", Float64, "\n")
-
-inputMatrix = geometric_matrix[1:20,1:20]
-    reportProgress = false
-    maxBettiNumber = 3
-    edgeDensity = .6
-    computeBetti0 = false
-    filePrefix = "matrix"
-    keepFiles = false
-    workDirectory = "."
-    writeMaxCliques = false
-    algorithm = "split"
-    threads = 1
-# end testing
+# # For testing only:
+# using MATLAB
+#  using DelimitedFiles
+#  using Plots
+#  using LinearAlgebra
+#
+# function plot_betti_numbers(betti_numbers, title="Geometric  matrix")
+#     x_values = range(0,stop=0.6,length=size(betti_numbers)[1])
+#
+#     plot(x_values, betti_numbers[:,1], label="beta_0", title=title) #, ylims = (0,maxy)
+#     plot!(x_values, betti_numbers[:,2], label="beta_1")
+#     plot!(x_values, betti_numbers[:,3], label="beta_2")
+#  end
+#
+#  function save_matrix_to_file(matrix, filename)
+#     open(filename, "w") do io
+#         writedlm(io,  matrix, ",")
+#     end
+#  end
+#
+#
+# geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
+#
+# inputMatrix = geometric_matrix[1:20,1:20]
+#     reportProgress = false
+#     maxBettiNumber = 3
+#     edgeDensity = .6
+#     computeBetti0 = false
+#     filePrefix = "matrix"
+#     keepFiles = false
+#     workDirectory = "."
+#     writeMaxCliques = false
+#     algorithm = "split"
+#     threads = 1
+# # end testing
 
     # ----------------------------------------------------------------
     # Validate and set parameters
     functionLocation = string(pwd(), "/compute_clique_topology.m")
     baseDirectory = pwd()
 
-    perseusDirectory = string(baseDirectory, "/perseus");
+    perseusDirectory = string(baseDirectory, "/perseus")
     neuralCodewareDirectory = string(baseDirectory, "/Neural_Codeware");
 
     if (algorithm == "naive") || (algorithm=="parnaive") && writeMaxCliques
@@ -145,12 +146,13 @@ inputMatrix = geometric_matrix[1:20,1:20]
     # ----------------------------------------------------------------
     # If we need Cliquer, make sure the files are compiled
     if (algorithm == "split")
-        if !isfile("./clique_top/Neural_Codeware/+Cliquer/FindAll.mexa64")
+        if isfile("./clique_top/Neural_Codeware/+Cliquer/FindAll.mexa64")
             println("MEX Cliquer not compiled. Compiling before beginning process.")
 
             startFolder = baseDirectory
-            # cd("Neural_Codeware"); It needs to be checked what is tha execution dir of this funciton
-            cd("clique_top/Neural_Codeware");
+            # It needs to be checked what is tha execution dir of this funciton
+            cd("Neural_Codeware");
+            # cd("clique_top/Neural_Codeware");
 
             # Compiler.compile()
             # What compile does it compiles the c file and create mex file so that the c object can be used in matlab. The latter is not necessary
@@ -181,13 +183,13 @@ inputMatrix = geometric_matrix[1:20,1:20]
     try
         cd(workDirectory);
         if isfile(string(workDirectory, "/", filePrefix, "_max_simplices.txt"))
-            error("File ($filePrefix)_max_simplices.txt already exists in directory ($workDirectory).");
+            error("File $(filePrefix)_max_simplices.txt already exists in directory $(workDirectory).");
         end
         if isfile(string(workDirectory, "/", filePrefix, "_simplices.txt"))
-            error("File ($filePrefix)_simplices.txt already exists in directory ($workDirectory).");
+            error("File $(filePrefix)_simplices.txt already exists in directory $(workDirectory).");
         end
         if isfile(string(workDirectory, "/", filePrefix, "_homology_betti.txt"))
-            error("File ($filePrefix)_homology_betti.txt already exists in directory ($workDirectory).");
+            error("File $(filePrefix)_homology_betti.txt already exists in directory $(workDirectory).");
         end
 
         for d=0:maxBettiNumber+1
@@ -204,9 +206,9 @@ inputMatrix = geometric_matrix[1:20,1:20]
     # Enumerate maximal cliques and print to Perseus input file
 
     if reportProgress
-        toc;
+        # toc;
         println("Enumerating cliques using $algorithm algorithm.");
-        tic;
+        # tic;
     end
 
     if algorithm == "combine"
@@ -231,9 +233,9 @@ inputMatrix = geometric_matrix[1:20,1:20]
     # Use Perseus to compute persistent homology
 
     if reportProgress
-        toc;
+        # toc;
         println("Using Perseus to compute persistent homology.");
-        tic;
+        # tic;
     end
 
     # run_perseus(filePrefix, perseusDirectory);
@@ -250,7 +252,7 @@ inputMatrix = geometric_matrix[1:20,1:20]
     run(`$perseusDirectory/$perseusCommand nmfsimtop $(filePrefix)_simplices.txt $(filePrefix)_homology`)
 
     if reportProgress
-        toc;
+        # toc;
     end
 
     # ----------------------------------------------------------------
@@ -275,10 +277,16 @@ inputMatrix = geometric_matrix[1:20,1:20]
             persistenceIntervals = zeros(Int64(numFiltrations), maxBettiNumber);
             unboundedIntervals = zeros(1,maxBettiNumber);
 
-            for d=0:maxBettiNumber
-                persistenceIntervals[:,d], unboundedIntervals[d] = mat" read_persistence_interval_distribution(...
-                sprintf('%s_homology_%i.txt', $filePrefix, $d), ...
-                $numFiltrations)"
+            for d=1:Int64(maxBettiNumber)
+                # A[:,d], B = mat" read_persistence_interval_distribution(...
+                # sprintf('%s_homology_%i.txt', $filePrefix, $d), ...
+                # $numFiltrations)"
+                # persistenceIntervals[:,d] = A
+                # unboundedIntervals[d] = B
+                mat"[$persistenceIntervals(:,$d), $unboundedIntervals($d) ] =...
+                        read_persistence_interval_distribution(...
+                        sprintf('%s_homology_%i.txt', $filePrefix, $d), ...
+                        $numFiltrations);"
             end
         end
 
