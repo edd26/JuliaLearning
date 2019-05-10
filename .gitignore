@@ -28,3 +28,6 @@ Manifest.toml
 
 # Ignore saved csv files
 *.csv
+
+# Ignore movies
+*.avi
