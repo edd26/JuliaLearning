@@ -1,5 +1,6 @@
 import Makie
  import VideoIO
+ using StatsBase
 
 
  """
@@ -30,19 +31,34 @@ Returns the tuple which contains width, height and the number of the frames of
 array in whcih video was loaded.
 """
 function get_video_dimension(video_array)
-   video_height = size(video_array[1],1)
-   video_width = size(video_array[1],2)
-   video_length = size(video_array,1)
+   v_hei = size(video_array[1],1)
+   v_wid = size(video_array[1],2)
+   v_len = size(video_array,1)
 
-   video_dim_tuple = (video_height, video_width, video_length)
+   video_dim_tuple = (video_height=v_hei, video_width=v_wid, video_length=v_len)
 
    return video_dim_tuple
 end
 
+"""
+    get_video_mask(points_per_dim, video_dim_tuple; distribution="uniform", sorted=true)
 
-function get_video_mask(points_per_dim, video_dim_tuple; distribution="uniform", sorted=true)
-    video_height = video_dim_tuple[1]
-    video_width = video_dim_tuple[2]
+Returns matrix of size @points_per_dim x 2 in which indicies of video frame are
+stored. The indicies are chosen based one the @distribution argument. One option
+is uniform distribution, the second is random distribution.
+
+Uniform distribution: distance between the points in given dimension is the even,
+but vertical distance may be different from horizontal distance between points.
+This depends on the size of a frame in a image.
+
+Random distribution: the distance between the points is not constant, because
+the points are chosen randomly in the ranges 1:horizontal size of frame,
+1:vertical size of frame. The returned values may be sorted in ascending order,
+if @sorted=true.
+"""
+function get_video_mask(points_per_dim, video_dimensions; distribution="uniform", sorted=true)
+    video_height = video_dimensions[1]
+    video_width = video_dimensions[2]
 
 
     if distribution == "uniform"
@@ -50,8 +66,11 @@ function get_video_mask(points_per_dim, video_dim_tuple; distribution="uniform",
         rows = points_per_dim
 
         # +1 is used so that the number of points returned is as requested
-        row_step = Int64(floor(video_height/rows))+1
-        column_step = Int64(floor(video_width/columns))+1
+        row_step = Int64(floor(video_height/rows))
+        column_step = Int64(floor(video_width/columns))
+
+        (video_height/row_step != points_per_dim) ? row_step+=1 : row_step
+        (video_width/column_step != points_per_dim) ? column_step+=1 : video_width
 
         vertical_indicies = collect(1:row_step:video_height)
         horizontal_indicies = collect(1:column_step:video_width)
@@ -78,6 +97,12 @@ function get_video_mask(points_per_dim, video_dim_tuple; distribution="uniform",
    return indicies_set
 end
 
+"""
+    extract_pixels_from_video(video_array, indicies_set, video_dim_tuple)
+
+Takes every frame from @video_array and extracts pixels which indicies are in
+@indicies_set, thus creating video with only chosen indicies.
+"""
 function extract_pixels_from_video(video_array, indicies_set, video_dim_tuple)
    rows = size(indicies_set,2)
    columns = size(indicies_set,2)
@@ -92,6 +117,14 @@ function extract_pixels_from_video(video_array, indicies_set, video_dim_tuple)
    return extracted_pixels
 end
 
+
+"""
+    vectorize_video(video)
+
+Rearrenges the video so that set of n frames (2D matrix varying in
+time) the set of vectors is returned, in which each row is a pixel, and each
+column is the value of the pixel in n-th frame.
+"""
 function vectorize_video(video)
     video_length = size(extracted_pixels, 3)
     rows = size(extracted_pixels,1)
@@ -108,6 +141,43 @@ function vectorize_video(video)
             index = index+1;
         end
     end
-    
+
     return vectorized_video
+end
+
+"""
+    get_pairwise_correlation_matrix(vectorized_video, tau_max=25)
+
+Computes pairwise correlation of the input signals accordingly to the formula
+presented in paper "Clique topology reveals intrinsic geometric structure
+in neural correlations" by Chad Giusti et al.
+"""
+function get_pairwise_correlation_matrix(vectorized_video, tau_max=25)
+    number_of_signals = size(vectorized_video,1)
+    T = size(vectorized_video,2)
+
+    C_ij = zeros(number_of_signals,number_of_signals);
+    # log_C_ij = zeros(number_of_signals,number_of_signals);
+
+     # this is given in frames
+    lags = -tau_max:1:tau_max
+
+    for row=1:number_of_signals
+        for column=1:number_of_signals
+            signal_ij = vectorized_video[row,:];
+            signal_ji = vectorized_video[column,:];
+
+            # cross_corelation
+            ccg_ij = crosscov(signal_ij, signal_ji, lags);
+            ccg_ij = ccg_ij ./ T;
+
+            A = sum(ccg_ij[tau_max+1:end]);
+            B = sum(ccg_ij[1:tau_max+1]);
+            r_i_r_j = 1;
+            C_ij[row, column] = max(A, B)/(tau_max*r_i_r_j);
+            # log_C_i_j[row, column] = log10(abs(C_ij[row, column]));
+        end
+    end
+
+    return C_ij
 end
