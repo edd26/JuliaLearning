@@ -1,21 +1,7 @@
 using MATLAB
  using DelimitedFiles
  using Plots
-
-function plot_betti_numbers(betti_numbers, title="Geometric  matrix")
-    x_values = range(0,stop=0.6,length=size(betti_numbers)[1])
-
-    plot(x_values, betti_numbers[:,1], label="beta_0", title=title) #, ylims = (0,maxy)
-    plot!(x_values, betti_numbers[:,2], label="beta_1")
-    plot!(x_values, betti_numbers[:,3], label="beta_2")
-end
-
-function save_matrix_to_file(matrix, filename)
-    open(filename, "w") do io
-        writedlm(io,  matrix, ',')
-    end
-end
-
+ include("GeometricMatrix.jl")
 
 geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
  shuffeled_matrix = readdlm( "shuffeled_matrix.csv",  ',', Float64, '\n')
