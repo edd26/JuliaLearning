@@ -1,8 +1,7 @@
-import Makie
- import VideoIO
- using MATLAB
+using MATLAB
  using StatsBase
  using Plots
+ include("VideoManage.jl")
 
 @enum VIDEO candle=1 water=2 checkboard=3 coral_reef=4
 
@@ -10,46 +9,28 @@ choice = candle
  simulate_spikes = false
 
  if choice == candle
-    video_streamer = VideoIO.open("64caf10.avi") # candle
+    video_name = "64caf10.avi" # candle
  elseif choice == water
-    video_streamer = VideoIO.open("56ub310.avi") # water
+    video_name = "56ub310.avi" # water
  elseif choice == checkboard
-    video_streamer = VideoIO.open("649j210.avi") # checkboard
+    video_name = "649j210.avi" # checkboard
  elseif choice == coral_reef
-    video_streamer = VideoIO.open("64ac220.avi") # coral reef
+    video_name = "64ac220.avi" # coral reef
  end
-
- video_length = 0;
- video_array = Vector{Array{UInt8}}(undef,0);
- video_file = VideoIO.openvideo(video_streamer, target_format=VideoIO.AV_PIX_FMT_GRAY8)
- vid_width = video_file.width;
- vid_height = video_file.height;
-
 
 # Read the video into the array
+ video_array = get_video_array_from_file(video_name)
+ video_dim_tuple = get_video_dimension(video_array)
+ video_width = video_dim_tuple[1]
+ video_height = video_dim_tuple[2]
+ video_length = video_dim_tuple[3]
 
-while !eof(video_file)
-    push!(video_array,reinterpret(UInt8, read(video_file)))
-    global video_length += 1
- end
- close(video_file)
-
-# video_file.Duration*video_file.FrameRate;
 ## Create set of evenly distributed indicies
 number_of_points = 20;
- horizontal_indicies = 1:Int64(floor(vid_width/number_of_points)):vid_width;
+ horizontal_indicies = 1:Int64(floor(video_width/number_of_points)):video_width;
  columns = size(horizontal_indicies,1)
- vertical_indicies = 1:Int64(floor(vid_height/number_of_points)):vid_height;
+ vertical_indicies = 1:Int64(floor(video_height/number_of_points)):video_height;
  rows = size(vertical_indicies,1)
-
-## Create set of randomly distributed indicies
-# number_of_points = 20;
-#
-# horizontal_indicies = rand(1,number_of_points);
-# horizontal_indicies = uint64(horizontal_indicies*vid_width);
-#
-# vertical_indicies = rand(1,number_of_points);
-# vertical_indicies = uint64(vertical_indicies*vid_height);
 
 ## Extract  pixel changes
 extracted_pixels = zeros(rows, columns, video_length);
