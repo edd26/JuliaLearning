@@ -1,5 +1,7 @@
 using Plots
+ using MATLAB
  include("VideoManage.jl")
+ include("GeometricMatrix.jl")
 
 VIDEO = (diag_1=1,
             diag_2=2,
@@ -9,9 +11,9 @@ VIDEO = (diag_1=1,
             diag_dbl=6,
             horiz=7)
 
-choice = VIDEO.diag_gb
+choice = VIDEO.horiz
  tau_max = 5
- points_per_dim = 15;
+ points_per_dim = 8;
  video_path = pwd()* "/videos/"
 
 # for choice = 1:length(VIDEO)
@@ -39,9 +41,45 @@ extracted_pixels = extract_pixels_from_video(video_array,
                                                 indicies_set, video_dimensions)
 vectorized_video = vectorize_video(extracted_pixels)
 C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
-
 # log_C_ij = map(log10, map(abs,C_ij))
-
 
 heatmap(C_ij,  color=:lightrainbow, title="Cij, $choice, number of points: $points_per_dim")
 # end
+
+# set the diagonal to zero
+for diag_elem in 1:size(C_ij,1)
+   C_ij[diag_elem,diag_elem] = 0
+end
+
+# Application of clique-top library to the correlation matrix
+ending = 50
+c_ij_betti_numbers = 0
+random_betti_numbers = 0
+
+
+println("Computing betti numbers for pairwise correlation matrix.")
+mat"addpath('clique-top'); $c_ij_betti_numbers = compute_clique_topology($C_ij(1:$ending, 1:$ending), 'MaxEdgeDensity', 0.6)"
+
+
+num_of_points = size(C_ij,1)
+elemnts_above_diagonal = Int64(num_of_points*(num_of_points-2))
+random_matrix = zeros(size(C_ij))
+set_of_random_numbers = rand(elemnts_above_diagonal)
+h = 1
+for k in 1:num_of_points
+    for m in k+1:num_of_points
+        random_matrix[k,m] = set_of_random_numbers[h]
+        random_matrix[m,k] = set_of_random_numbers[h]
+       global  h +=1
+    end
+end
+
+println("Computing betti numbers for pairwise correlation matrix.")
+mat"addpath('clique-top'); $random_betti_numbers = compute_clique_topology($random_matrix(1:$ending, 1:$ending), 'MaxEdgeDensity', 0.7)"
+
+plot_betti_numbers(random_betti_numbers, "Pairwise correlation  matrix, matrix size $ending")
+
+plot_betti_numbers(c_ij_betti_numbers, "Pairwise correlation  matrix, matrix size $ending")
+
+# TODO Compare the Eirene with clique top results
+# TODO Test the influence of parameters at the betti curves
