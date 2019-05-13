@@ -31,3 +31,4 @@ Manifest.toml
 
 # Ignore movies
 *.avi
+*.mov
