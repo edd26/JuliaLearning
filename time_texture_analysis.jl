@@ -7,6 +7,8 @@ using MATLAB
 
 choice = candle
  simulate_spikes = false
+ points_per_dim = 10;
+ tau_max = 25;
 
  if choice == candle
     video_name = "64caf10.avi" # candle
@@ -20,14 +22,10 @@ choice = candle
 
  # Read the video into the array
  video_array = get_video_array_from_file(video_name)
- video_dim_tuple = get_video_dimension(video_array)
-
- # video_file.Duration*video_file.FrameRate;
- ## Create set of uniformly distributed indicies
- points_per_dim = 10;
-
- indicies_set = get_video_mask(points_per_dim, video_dim_tuple)
- extracted_pixels = extract_pixels_from_video(video_array, indicies_set, video_dim_tuple)
+ video_dimensions = get_video_dimension(video_array)
+ indicies_set = get_video_mask(points_per_dim, video_dimensions)
+ extracted_pixels = extract_pixels_from_video(video_array,
+                                                 indicies_set, video_dimensions)
  vectorized_video = vectorize_video(extracted_pixels)
 
 # Consider the signals as neuron spike train in the total time duration T
@@ -59,39 +57,10 @@ if simulate_spikes
    end
 end
 ##
-C_ij = zeros(number_of_signals,number_of_signals);
- log_C_i_j = zeros(number_of_signals,number_of_signals);
- T = video_length # size(vectorized_video,2);
- interval_length = 20;
- subs = zeros(T,1);
- tau_max = 25; # this is given in frames
- lags = -tau_max:1:tau_max
 
 
-used_signal = vectorized_video;
-# used_signal = spike_train;
+C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
 
-for row=1:number_of_signals
-    for column=1:number_of_signals
-        signal_ij = used_signal[row,:];
-        signal_ji = used_signal[column,:];
-
-        # cross_corelation
-        #  MATLAB is 10 times slower than Julia in computing crosscorrelation
-        ccg_ij = crosscov(signal_ij, signal_ji, lags);
-        ccg_ij = ccg_ij ./ T;
-
-
-        A = sum(ccg_ij[tau_max+1:end]);
-        B = sum(ccg_ij[1:tau_max+1]);
- r_i_r_j = 1;
-        C_ij[row, column] = max(A, B)/(tau_max*r_i_r_j);
-        log_C_i_j[row, column] = log10(abs(C_ij[row, column]));
-    end
-end
-
-##
-# clf('reset')
 heatmap(C_ij,  color=:lightrainbow, title="Cij, $choice, number of points: $number_of_signals")
 
 heatmap(log_C_i_j,  color=:lightrainbow, title="log10 Cij, $choice, number of points: $number_of_signals")
