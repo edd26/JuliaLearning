@@ -18,37 +18,17 @@ choice = candle
     video_name = "64ac220.avi" # coral reef
  end
 
-# Read the video into the array
+ # Read the video into the array
  video_array = get_video_array_from_file(video_name)
  video_dim_tuple = get_video_dimension(video_array)
- video_width = video_dim_tuple[1]
- video_height = video_dim_tuple[2]
- video_length = video_dim_tuple[3]
 
-## Create set of evenly distributed indicies
-number_of_points = 20;
- horizontal_indicies = 1:Int64(floor(video_width/number_of_points)):video_width;
- columns = size(horizontal_indicies,1)
- vertical_indicies = 1:Int64(floor(video_height/number_of_points)):video_height;
- rows = size(vertical_indicies,1)
+ # video_file.Duration*video_file.FrameRate;
+ ## Create set of uniformly distributed indicies
+ points_per_dim = 10;
 
-## Extract  pixel changes
-extracted_pixels = zeros(rows, columns, video_length);
- for frame_number in 1:video_length
-    extracted_pixels[:,:,frame_number] = video_array[frame_number][vertical_indicies, horizontal_indicies]
- end
-
-## Reshape the extracted pixels to the vector form
- number_of_signals = rows*columns
- vectorized_video = zeros(number_of_signals, video_length);
-
- index = 1;
- for row=1:rows
-    for column=1:columns
-        vectorized_video[index,:] = extracted_pixels[row, column,:];
-        global index = index+1;
-    end
- end
+ indicies_set = get_video_mask(points_per_dim, video_dim_tuple)
+ extracted_pixels = extract_pixels_from_video(video_array, indicies_set, video_dim_tuple)
+ vectorized_video = vectorize_video(extracted_pixels)
 
 # Consider the signals as neuron spike train in the total time duration T
 # At this point, the set of vectors may be considered as raw EEG recordings
