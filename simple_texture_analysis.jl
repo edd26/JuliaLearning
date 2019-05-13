@@ -40,26 +40,8 @@ vectorized_video = vectorize_video(extracted_pixels)
 # 3. generation of the signal with same average spiking
 # 4. Crosscorelation of average spike bin
 # 5. The pairwise correlations Cij (blue
-## 1-3: Generate spike train from signal and
-# simulate the spike train with the same average fring rate
-threshold = 25;
- spike_interval = 25; #this works as a refraction period
- signal_duration = video_length;
- spike_train = zeros(number_of_signals, video_length);
- simulated_spike_train = zeros(number_of_signals, video_length);
- average_firing_rate = zeros(number_of_signals, 1);
 
-if simulate_spikes
-   for k = 1:number_of_signals
-   #     [spike_count ,spike_index] = spike_times(vectorized_video(k,:),threshold);
-       mat"[spike_count, spike_index] = get_spikes($vectorized_video($k,:),$threshold, $spike_interval);"
 
-       spike_train(k,spike_index) = 1;
-       average_firing_rate(k) = spike_count/signal_duration;
-
-       simulated_spike_train(k,:) = rand(1, signal_duration) < average_firing_rate(k);
-   end
-end
 ##
 C_ij = zeros(number_of_signals,number_of_signals);
  log_C_i_j = zeros(number_of_signals,number_of_signals);
