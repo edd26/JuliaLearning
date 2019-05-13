@@ -1,80 +1,47 @@
-using MATLAB
- using StatsBase
- using Plots
+using Plots
  include("VideoManage.jl")
 
-@enum VIDEO candle=1 water=2 checkboard=3 coral_reef=4
+VIDEO = (diag_1=1,
+            diag_2=2,
+            diag_g1=3,
+            diag_g2=4,
+            diag_gb=5,
+            diag_dbl=6,
+            horiz=7)
 
-choice = candle
- simulate_spikes = false
+choice = VIDEO.diag_gb
+ tau_max = 5
+ points_per_dim = 15;
+ video_path = pwd()* "/videos/"
 
- if choice == candle
-    video_name = "64caf10.avi" # candle
- elseif choice == water
-    video_name = "56ub310.avi" # water
- elseif choice == checkboard
-    video_name = "649j210.avi" # checkboard
- elseif choice == coral_reef
-    video_name = "64ac220.avi" # coral reef
+# for choice = 1:length(VIDEO)
+if choice == VIDEO.diag_1
+    video_name = "diag_strip_30sec_1.mov"
+ elseif choice == VIDEO.diag_2
+    video_name = "diag_strip_30sec_2.mov"
+ elseif choice == VIDEO.diag_g1
+    video_name = "diag_strip_30sec_gray_1.mov"
+ elseif choice == VIDEO.diag_g2
+    video_name = "diag_strip_30sec_gray_2.mov"
+ elseif choice == VIDEO.diag_gb
+    video_name = "diag_strip_30sec_gray_both.mov"
+ elseif choice == VIDEO.diag_dbl
+    video_name = "diag_strip_30sec_single_dbl_gaps.mov"
+ elseif choice == VIDEO.horiz
+    video_name = "horiz_strip_30sec.mov"
  end
 
-# Read the video into the array
-video_array = get_video_array_from_file(video_name)
-video_dim_tuple = get_video_dimension(video_array)
-
-# video_file.Duration*video_file.FrameRate;
-## Create set of uniformly distributed indicies
-points_per_dim = 10;
-
-indicies_set = get_video_mask(points_per_dim, video_dim_tuple)
-extracted_pixels = extract_pixels_from_video(video_array, indicies_set, video_dim_tuple)
+#
+video_array = get_video_array_from_file(video_path*video_name)
+video_dimensions = get_video_dimension(video_array)
+indicies_set = get_video_mask(points_per_dim, video_dimensions)
+extracted_pixels = extract_pixels_from_video(video_array,
+                                                indicies_set, video_dimensions)
 vectorized_video = vectorize_video(extracted_pixels)
+C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
 
-## Reshape the extracted pixels to the vector form
-
-# Consider the signals as neuron spike train in the total time duration T
-# At this point, the set of vectors may be considered as raw EEG recordings
-# The following procedure must be applied now:
-# 1. Spike sorting
-# 2. Spike average for time bin
-# 3. generation of the signal with same average spiking
-# 4. Crosscorelation of average spike bin
-# 5. The pairwise correlations Cij (blue
+# log_C_ij = map(log10, map(abs,C_ij))
 
 
-##
-C_ij = zeros(number_of_signals,number_of_signals);
- log_C_i_j = zeros(number_of_signals,number_of_signals);
- T = video_length # size(vectorized_video,2);
- interval_length = 20;
- subs = zeros(T,1);
- tau_max = 25; # this is given in frames
- lags = -tau_max:1:tau_max
-
-
-used_signal = vectorized_video;
-# used_signal = spike_train;
-
-for row=1:number_of_signals
-    for column=1:number_of_signals
-        signal_ij = used_signal[row,:];
-        signal_ji = used_signal[column,:];
-
-        # cross_corelation
-        #  MATLAB is 10 times slower than Julia in computing crosscorrelation
-        ccg_ij = crosscov(signal_ij, signal_ji, lags);
-        ccg_ij = ccg_ij ./ T;
-
-
-        A = sum(ccg_ij[tau_max+1:end]);
-        B = sum(ccg_ij[1:tau_max+1]);
- r_i_r_j = 1;
-        C_ij[row, column] = max(A, B)/(tau_max*r_i_r_j);
-        log_C_i_j[row, column] = log10(abs(C_ij[row, column]));
-    end
-end
-
-
-heatmap(C_ij,  color=:lightrainbow, title="Cij, $choice, number of points: $number_of_signals")
-
-heatmap(log_C_i_j,  color=:lightrainbow, title="log10 Cij, $choice, number of points: $number_of_signals")
+heatmap(C_ij,  color=:lightrainbow, title="Cij, $choice, number of points: $points_per_dim")
+# end
