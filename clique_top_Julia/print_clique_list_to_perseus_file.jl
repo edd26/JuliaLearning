@@ -14,16 +14,19 @@
 %   filtration: filtration number with which to tag these cliques
 %
 % ---------------------------------------------------------------- =#
-function print_clique_list_to_perseus_file(cliques, filePrefix, filtration)
+function print_clique_list_to_perseus_file(cliques, fid, filtration )
+# # ## Testing
+#     cliques = brokenCliqueSets
+#     fid = cliqueFid
+# #     ## end testing
+    for j=1:length(cliques)
+        clique_size = size(cliques[j],1)-1
+        line = string(clique_size, " ")
 
-    open("$(filePrefix)_simplices.txt", "a") do cliqueFid
-        for j=1:length(cliques)
-            write(cliqueFid,"$(size(cliques{j},2)-1))")
-            for k=1:(size(cliques{j},2))
-                write(cliqueFid,"$(cliques{j}(k))")
-            end
-            write(cliqueFid,"$(filtration)\n")
+        for element in cliques[j]
+            global line = line*string(element, " ")
         end
-
+        line = line*string(i, "\n")
+        write(cliqueFid,line)
     end
 end
