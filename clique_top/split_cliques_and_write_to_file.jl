@@ -29,12 +29,12 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity, f
     matrixSize = size(symMatrix, 1);
 
      mat"[ thresholdedMatrix, edgeList ] = threshold_graph_by_density(...
-        symMatrix, maxDensity );";
+        $symMatrix, $maxDensity );";
 
     maxFiltration = length(edgeList);
 
     if (maxDensity < 1)
-        mat"maximalGraph = Graph(logical(thresholdedMatrix));";
+        mat"maximalGraph = Graph(logical($thresholdedMatrix));";
 
         mat"initialMaxCliques = maximalGraph.GetCliques(1,0, true);"
     else
