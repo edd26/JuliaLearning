@@ -2,15 +2,20 @@ using MATLAB
  using DelimitedFiles
  using Plots
  include("GeometricMatrix.jl")
+ include("clique_top_Julia/clique_top.jl")
 
-geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
- shuffeled_matrix = readdlm( "shuffeled_matrix.csv",  ',', Float64, '\n')
+geometric_matrix = readdlm( "geometric_matrix.csv", ',', Float64, '\n')
+
+shuffeled_matrix = readdlm( "shuffeled_matrix.csv",  ',', Float64, '\n')
  random_matrix = readdlm( "random_matrix.csv",  ',', Float64, '\n')
 
-ending = 88
+ending = 40
 
 println("Computing betti numbers for geometric matrix with $(ending)x$ending matrix.")
- mat"$geom_betti_numbers = compute_clique_topology($geometric_matrix(1:$ending, 1:$ending), 'Algorithm', 'split');"
+ # mat"$geom_betti_numbers = compute_clique_topology($geometric_matrix(1:$ending, 1:$ending), 'Algorithm', 'split');"
+
+# TODO ERROR: UndefVarError: bettiCurves not defined
+@time bettiCurves, edgeDensities, persistenceIntervals, unboundedIntervals = compute_clique_topology(geometric_matrix[1:ending, 1:ending])
 
 println("Computing betti numbers for random matrix with $(ending)x$ending matrix.")
  mat"$rand_betti_numbers = compute_clique_topology($random_matrix(1:$ending, 1:$ending), 'Algorithm', 'split');"
