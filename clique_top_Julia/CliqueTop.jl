@@ -91,8 +91,8 @@ function print_clique_list_to_perseus_file(cliques, fid, filtration )
         for element in cliques[j]
             line = line*string(element, " ")
         end
-        line = line*string(i, "\n")
-        write(cliqueFid,line)
+        line = line*string(filtration, "\n")
+        write(fid,line)
     end
 end
 
@@ -156,7 +156,7 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity, f
     maxCliqueMatrix = 0
     brokenCliqueMatrix = 0
     mat"$maxCliqueMatrix = initialMaxCliques.ToMatrix();"
-
+cliqueFid = 0
     try
         cliqueFid = open("$(filePrefix)_simplices.txt", "w")
         write(cliqueFid,"1\n")
@@ -209,12 +209,22 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity, f
                 print_clique_list_to_perseus_file(vertexSet, cliqueMaxFid, 1);
             end
         end
+        # println("Here1")
+        # close(cliqueFid)
+        # println("Here2")
+        #
+        # if writeMaxCliques
+        #     println("Here")
+        #     close(cliqueMaxFid)
+        # end
+    catch
+        println("Something went wrong")
     finally
-        close(cliqueFid)
-
-        if writeMaxCliques
-            close(cliqueMaxFid)
-        end
+        # close(cliqueFid)
+        #
+        # if writeMaxCliques
+        #     close(cliqueMaxFid)
+        # end
     end
     return maxFiltration
 end
