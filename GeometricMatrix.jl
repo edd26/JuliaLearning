@@ -1,14 +1,8 @@
 using Distances
-    using DataFrames
-    using Random
-    using LightGraphs
-    using GraphPlot
-
-# module GeometricMatrix
-#
-# export generate_random_point_cloud,
-#     generate_geometric_matrix,
-#     generate_matrix_ordering
+ using DataFrames
+ using Random
+ using LightGraphs
+ using GraphPlot
 
 function generate_random_point_cloud(number_of_points = 12, dimensions=2)
     matrix_size = number_of_points
@@ -99,8 +93,6 @@ function generate_set_of_graphs(matrix_size, matrix_ordering)
         add_edge!(set_of_graphs[k], edges[1,k], edges[2,k]);
         edges_counter[k] = ne(set_of_graphs[k])
         edge_density[k] = edges_counter[k]/binomial(matrix_size,2)
-
-
 
         if k<num_of_edges # if is used to eliminate copying at last iteration
             set_of_graphs[k+1] = copy(set_of_graphs[k])
