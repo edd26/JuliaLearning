@@ -1,89 +1,43 @@
 # %%
 using Distances
-using DataFrames
-using Random
-using LightGraphs
-using GraphPlot
-# using Graphs
+ using DataFrames
+ using Random
+ using LightGraphs
+ using GraphPlot
+ using Plots
+ using WebIO
+ using Eirene
+ using DelimitedFiles
+ include("GeometricMatrix.jl")
 
-using Plots
-using WebIO
 
-using Eirene
-
-using DelimitedFiles
-# %% markdown
-# # Generation of geometric matrix
-# Geometric matrices were obtained by sampling a set of N i.i.d. points were then given by Cij = −||pi − pj||, where the minus sign ensures that they monotonically uniformly distributed in the d-dimensional unit cube [0, 1]d ⊂ Rd, for d ≤ N. The matrix entries decrease with distance, as expected for geometrically organized correlations.
-#
 # collection of points embedded in some Euclidean space ->  negative distance matrix -> geometric order complex
-# %%
 # Each column is a point, each row n is coordinate in the n-th dimension
 dimensions = 20
 N = 88
 random_points = rand(Float64, dimensions, N)
-# %%
-# ezplot_pjs(unit_cube)
-# %% markdown
-# ### Computing distance between casted points stored in "random_points"
-# %%
-geometric_matrix = pairwise(Euclidean(), random_points, dims=2)
+
+geometric_matrix =generate_geometric_matrix(random_points)
 geometric_matrix = -geometric_matrix;
 
-# %%
-# Shuffled matrix
-indicies_collection = findall(x->x<0, geometric_matrix)
-# indicies_collection = findall(x->x>0, geometric_matrix)
-# Shuffle the indicies
-rand!(indicies_collection, indicies_collection)
+## Shuffled matrix
+shuffeled_matrix = generate_shuffled_matrix(geometric_matrix)
 
-shuffeled_matrix = copy(geometric_matrix)
+## Random matrix
+random_matrix = generate_random_matrix(N)
 
-# Swap the elements
-n=1
-for k in 1:N
-    for m in k+1:N
-        a = indicies_collection[n][1]
-        b = indicies_collection[n][2]
-        shuffeled_matrix[k,m] = geometric_matrix[a,b]
-        shuffeled_matrix[m,k] = geometric_matrix[b,a]
-
-        shuffeled_matrix[a,b] = geometric_matrix[k,m]
-        shuffeled_matrix[b,a] = geometric_matrix[m,k]
-
-        global n +=1
-    end
-end
-# %%
-elemnts_above_diagonal = Int((N^2-N)/2)
-
-random_matrix = zeros(size(geometric_matrix))
-
-set_of_random_numbers = rand(elemnts_above_diagonal)
-
-h = 1
-for k in 1:N
-    for m in k+1:N
-        random_matrix[k,m] = set_of_random_numbers[h]
-        random_matrix[m,k] = set_of_random_numbers[h]
-        global h +=1
-    end
-end
-
-
-# %%
 # Save Matricies to csv files
+if save
+    writedlm( "geometric_matrix.csv",  geometric_matrix, ',')
+    writedlm( "shuffeled_matrix.csv",  shuffeled_matrix, ',')
+    writedlm( "random_matrix.csv",  random_matrix, ',')
+end
 
-writedlm( "geometric_matrix.csv",  geometric_matrix, ',')
-writedlm( "shuffeled_matrix.csv",  shuffeled_matrix, ',')
-writedlm( "random_matrix.csv",  random_matrix, ',')
-# %%
+## Compute topoplogies of matricies
 geom_eirene = eirene(-geometric_matrix, model="vr", maxdim=3)
-# geometric_matrix
-# %%
 shuffled_eirene = eirene(-shuffeled_matrix, model="vr", maxdim=3)
 random_eirene= eirene(random_matrix, model="vr", maxdim=3)
-# %%
+
 # Get the betti curves f
 dimen = 1
 
