@@ -4,21 +4,19 @@ using Distances
  using LightGraphs
  using GraphPlot
 
-function generate_random_point_cloud(number_of_points = 12, dimensions=2)
-    matrix_size = number_of_points
-    random_points = rand(Float64, dimensions, matrix_size)
-    return random_points
-end
+generate_random_point_cloud(number_of_points = 12, dimensions=2) =
+                                    rand(Float64, dimensions, number_of_points)
+
 
 function generate_geometric_matrix(random_points)
-    geometric_matrix = pairwise(Euclidean(), random_points, dims=2)
-    return -geometric_matrix
+    geometric_matrix = pairwise(Euclidean(), random_points, dims=1)
+    return geometric_matrix
 end
 
 function generate_shuffled_matrix(geometric_matrix)
     matrix_size = size(geometric_matrix,1)
 
-    indicies_collection = findall(x->x<0, geometric_matrix)
+    indicies_collection = findall(x->x>0, geometric_matrix)
     rand!(indicies_collection, indicies_collection)
     shuffeled_matrix = copy(geometric_matrix)
 
@@ -42,7 +40,7 @@ end
 
 function generate_random_matrix(matrix_size)
     elemnts_above_diagonal = Int((matrix_size^2-matrix_size)/2)
-    random_matrix = zeros(size(geometric_matrix))
+    random_matrix = zeros(matrix_size, matrix_size)
     set_of_random_numbers = rand(elemnts_above_diagonal)
 
     h = 1
@@ -50,12 +48,15 @@ function generate_random_matrix(matrix_size)
         for m in k+1:matrix_size
             random_matrix[k,m] = set_of_random_numbers[h]
             random_matrix[m,k] = set_of_random_numbers[h]
-            global h +=1
+            h += 1
         end
     end
+
+    return random_matrix
 end
 
-function generate_matrix_ordering(geometric_matrix, matrix_size)
+function generate_matrix_ordering(geometric_matrix)
+    matrix_size = size(geometric_matrix, 2)
     elemnts_above_diagonal = Int((matrix_size^2-matrix_size)/2)
     matrix_ordering = zeros(Int, 2,elemnts_above_diagonal)
 
