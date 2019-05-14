@@ -11,8 +11,8 @@ using Distances
 #     generate_matrix_ordering
 
 function generate_random_point_cloud(number_of_points = 12, dimensions=2)
-    N = number_of_points
-    random_points = rand(Float64, dimensions, N)
+    matrix_size = number_of_points
+    random_points = rand(Float64, dimensions, matrix_size)
     return random_points
 end
 
@@ -21,8 +21,48 @@ function generate_geometric_matrix(random_points)
     return -geometric_matrix
 end
 
-function generate_matrix_ordering(geometric_matrix, N)
-    elemnts_above_diagonal = Int((N^2-N)/2)
+function generate_shuffled_matrix(geometric_matrix)
+    matrix_size = size(geometric_matrix,1)
+
+    indicies_collection = findall(x->x<0, geometric_matrix)
+    rand!(indicies_collection, indicies_collection)
+    shuffeled_matrix = copy(geometric_matrix)
+
+    # Swap the elements
+    n=1
+    for k in 1:matrix_size
+        for m in k+1:matrix_size
+            a = indicies_collection[n][1]
+            b = indicies_collection[n][2]
+            shuffeled_matrix[k,m] = geometric_matrix[a,b]
+            shuffeled_matrix[m,k] = geometric_matrix[b,a]
+
+            shuffeled_matrix[a,b] = geometric_matrix[k,m]
+            shuffeled_matrix[b,a] = geometric_matrix[m,k]
+
+            n +=1
+        end
+    end
+    return shuffeled_matrix
+end
+
+function generate_random_matrix(matrix_size)
+    elemnts_above_diagonal = Int((matrix_size^2-matrix_size)/2)
+    random_matrix = zeros(size(geometric_matrix))
+    set_of_random_numbers = rand(elemnts_above_diagonal)
+
+    h = 1
+    for k in 1:matrix_size
+        for m in k+1:matrix_size
+            random_matrix[k,m] = set_of_random_numbers[h]
+            random_matrix[m,k] = set_of_random_numbers[h]
+            global h +=1
+        end
+    end
+end
+
+function generate_matrix_ordering(geometric_matrix, matrix_size)
+    elemnts_above_diagonal = Int((matrix_size^2-matrix_size)/2)
     matrix_ordering = zeros(Int, 2,elemnts_above_diagonal)
 
     A = copy(geometric_matrix)
@@ -45,8 +85,8 @@ function generate_matrix_ordering(geometric_matrix, N)
     return matrix_ordering
 end
 
-function generate_set_of_graphs(N, matrix_ordering)
-    vetrices = N
+function generate_set_of_graphs(matrix_size, matrix_ordering)
+    vetrices = matrix_size
     edges = matrix_ordering
     num_of_edges = size(edges)[2]
 
@@ -58,7 +98,7 @@ function generate_set_of_graphs(N, matrix_ordering)
     for k in range(1,stop=num_of_edges)~
         add_edge!(set_of_graphs[k], edges[1,k], edges[2,k]);
         edges_counter[k] = ne(set_of_graphs[k])
-        edge_density[k] = edges_counter[k]/binomial(N,2)
+        edge_density[k] = edges_counter[k]/binomial(matrix_size,2)
 
 
 
