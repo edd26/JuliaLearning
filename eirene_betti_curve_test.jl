@@ -1,30 +1,24 @@
 # %%
 using Distances
  using DataFrames
- using Random
+ # using Random
  using LightGraphs
  using GraphPlot
  using Plots
- using WebIO
  using Eirene
  using DelimitedFiles
  include("GeometricMatrix.jl")
 
+save = false
 
 # collection of points embedded in some Euclidean space ->  negative distance matrix -> geometric order complex
 # Each column is a point, each row n is coordinate in the n-th dimension
 dimensions = 20
-N = 88
-random_points = rand(Float64, dimensions, N)
-
-geometric_matrix =generate_geometric_matrix(random_points)
-geometric_matrix = -geometric_matrix;
-
-## Shuffled matrix
-shuffeled_matrix = generate_shuffled_matrix(geometric_matrix)
-
-## Random matrix
-random_matrix = generate_random_matrix(N)
+ N = 60
+ random_points = generate_random_point_cloud(dimensions, N)
+ geometric_matrix = generate_geometric_matrix(random_points)
+ shuffeled_matrix = generate_shuffled_matrix(geometric_matrix)
+ random_matrix = generate_random_matrix(N)
 
 # Save Matricies to csv files
 if save
@@ -34,54 +28,59 @@ if save
 end
 
 ## Compute topoplogies of matricies
-geom_eirene = eirene(-geometric_matrix, model="vr", maxdim=3)
-shuffled_eirene = eirene(-shuffeled_matrix, model="vr", maxdim=3)
-random_eirene= eirene(random_matrix, model="vr", maxdim=3)
+my_maxdim = 3
+ending = 40
+
+geom_eirene = eirene(geometric_matrix, model="vr", maxdim=my_maxdim)
+ shuffled_eirene = eirene(shuffeled_matrix, model="vr", maxdim=my_maxdim)
+ random_eirene= eirene(random_matrix[1:ending, 1:ending], model="vr", maxdim=my_maxdim)
 
 # Get the betti curves f
 dimen = 1
 
 # Geomteric
+# plotbarcode_pjs(geom_eirene)
 geom_betti1 = betticurve(geom_eirene, dim=1)
-geom_betti = zeros(size(geom_betti1)[1], 3+1)
-geom_betti[:,1] = geom_betti1[:,1]
-for k in 1:3
-    geom_betti[:,k+1] = betticurve(geom_eirene, dim=k)[:,2]
-end
+ geom_betti = zeros(size(geom_betti1)[1], 3+1)
+ geom_betti[:,1] = geom_betti1[:,1]
+ for k in 1:3
+     geom_betti[:,k+1] = betticurve(geom_eirene, dim=k)[:,2]
+ end
 
 # Shuffle
 shuffled_betti1 = betticurve(shuffled_eirene, dim=1)
-shuffled_betti = zeros(size(shuffled_betti1)[1], 3+1)
-shuffled_betti[:,1] = shuffled_betti1[:,1]
-for k in 1:3
-    shuffled_betti[:,k+1] = betticurve(shuffled_eirene, dim=k)[:,2]
-end
+ shuffled_betti = zeros(size(shuffled_betti1)[1], 3+1)
+ shuffled_betti[:,1] = shuffled_betti1[:,1]
+ for k in 1:3
+     shuffled_betti[:,k+1] = betticurve(shuffled_eirene, dim=k)[:,2]
+ end
 
 # Random
 random_betti1 = betticurve(random_eirene, dim=1)
-random_betti = zeros(size(random_betti1)[1], 3+1)
-random_betti[:,1] = random_betti1[:,1]
-for k in 1:3
-    random_betti[:,k+1] = betticurve(random_eirene, dim=k)[:,2]
-end
+ random_betti = zeros(size(random_betti1)[1], 3+1)
+ random_betti[:,1] = random_betti1[:,1]
+ for k in 1:3
+     random_betti[:,k+1] = betticurve(random_eirene, dim=k)[:,2]
+ end
 # %%
 matrix = random_betti
-maxy = findmax(matrix[:,4])[2]
-
-plot(matrix[:,1], matrix[:,2], label="Shuffled matrix, dim=1", ylims = (0,maxy))
-plot!(matrix[:,1], matrix[:,3], label="Shuffled matrix, dim=2")
-plot!(matrix[:,1], matrix[:,4], label="Shuffled matrix, dim=3")
-# %%
+ maxy = findmax(matrix[:,2])[2]
+ plot(matrix[:,1], matrix[:,2], label="Random matrix, dim=1", ylims = (0,maxy))
+ plot!(matrix[:,1], matrix[:,3], label="Random matrix, dim=2")
+ plot!(matrix[:,1], matrix[:,4], label="Random matrix, dim=3")
+ # %%
 matrix = shuffled_betti
-plot(matrix[:,1], matrix[:,2], label="Shuffled matrix, dim=1", ylims = (0,maxy))
-plot!(matrix[:,1], matrix[:,3], label="Shuffled matrix, dim=2")
-plot!(matrix[:,1], matrix[:,4], label="Shuffled matrix, dim=3")
-# %%
+ plot(matrix[:,1], matrix[:,2], label="Shuffled matrix, dim=1", ylims = (0,maxy))
+ plot!(matrix[:,1], matrix[:,3], label="Shuffled matrix, dim=2")
+ plot!(matrix[:,1], matrix[:,4], label="Shuffled matrix, dim=3")
+ # %%
 matrix = geom_betti
-plot(matrix[:,1], matrix[:,2], label="Geometric matrix, dim=1", ylims = (0,maxy))
-plot!(matrix[:,1], matrix[:,3], label="Geometric matrix, dim=2")
-plot!(matrix[:,1], matrix[:,4], label="Geometric matrix, dim=3")
-# xaxis_range = [0,120]
+ plot(matrix[:,1], matrix[:,2], label="Geometric matrix, dim=1", ylims = (0,maxy))
+ plot!(matrix[:,1], matrix[:,3], label="Geometric matrix, dim=2")
+ plot!(matrix[:,1], matrix[:,4], label="Geometric matrix, dim=3")
+
+betticurve(shuffled_eirene, dim=1)
+
 # %%
 dimen = 2
 
@@ -110,47 +109,15 @@ elseif plot_shuffle
     end
 end
 
-# %% markdown
-# ### Creating matrix ordering "matrix_ordering" of matrix "geometric_matrix"
-#
-# Find the maximum value, return indicies, remove it, repeat until all are 0.0, inverse matrix.
-#
-# First element in "matrix ordering" is of lowest value.
-#
-# (The indexing is inversed in comparison to the article)
-# %%
-# How many elements above diagonal are in matrix?
-elemnts_above_diagonal = Int((N^2-N)/2)
 
-matrix_ordering = zeros(Int, 2,elemnts_above_diagonal)
 
-A = copy(geometric_matrix)
+## Creating matrix ordering "matrix_ordering" of matrix "geometric_matrix"
+matrix_ordering = generate_matrix_ordering(geometric_matrix)
 
-k=1
-
-for element in range(1,stop=elemnts_above_diagonal)
-#     Find maximal distance
-    maximal_value = findmax(A)
-#     Get the coordinates
-    matrix_ordering[1,k] = Int(maximal_value[2][1])
-    matrix_ordering[2,k] = Int(maximal_value[2][2])
-
-#     Zero maxval in A (above and below diagonal) so next maxval can be found
-    A[matrix_ordering[1,k], matrix_ordering[2,k]] = 0.0
-    A[matrix_ordering[2,k], matrix_ordering[1,k]] = 0.0
-
-    k+=1
-end
-
-#
-
-matrix_ordering= matrix_ordering[:,end:-1:1]
-# %% markdown
-# ## Create nested graph
+## Create nested graph
 # There is as much graphs as there is random indicies=N
-# %%
 # Each vertex is the column, because columns represent different elements, between which distance was measured
-vetrices = N #
+vetrices = N
 
 # Edges are created between every points up to the level k
 edges = matrix_ordering
@@ -208,20 +175,6 @@ for k in range(1,stop=n) # n from the jupytrt cell in which graph is created
     D[matrix_ordering[2,k], matrix_ordering[1,k]] += 1
 end
 
-# for row in eachrow(D)
-#     println(row)
-# end
-
-# C = eirene(D,maxdim=3,model="vr")
-# %%
-# ezplot_pjs(set_of_graphs[n])
-# %%
-C = eirene(geometric_matrix,maxdim=2,model="vr")
-# %%
-# plotbarcode_pjs(C,dim=0:1)
-plotpersistencediagram_pjs(C,dim=1)
-# %%
-plotbetticurve_pjs(C, dim=2)
 # %% markdown
 # ### "complex mdoe"
 # Suppose that G is the last in a nested sequence of graphs G1, G2, G3.
