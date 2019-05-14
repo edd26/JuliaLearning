@@ -1,5 +1,100 @@
-include("restrict_max_cliques_to_size.jl")
-include("print_clique_list_to_perseus_file.jl")
+using Combinatorics
+
+"""----------------------------------------------------------------
+ RESTRICT CLIQUES TO SIZE
+ written by Chad Giusti, 6/2014
+
+ Given a cell array whose elements are positive integer arrays
+ listing vertices in the maximal cliques in a graph, return a
+ cell array of cliques appearing in the graph of size no larger
+ than maxSize. The list may contain repetitions.
+
+ INPUTS:
+	maximalCliques: cell array of positive integer arrays listing
+       vertices in maximal cliques of a graph
+   maxSize: maximum clique size of interest
+
+ OUTPUTS:
+   restrictedCliques: maximal cliques in the graph of size no
+       more than maxSize
+
+ ----------------------------------------------------------------
+"""
+function restrict_max_cliques_to_size(maximalCliques, maxSize, firstVertex,secondVertex)
+# ## Testing code:
+# maximalCliques = brokenCliqueSets
+# maxSize = maxCliqueSize
+# firstVertex = firstVertex
+# secondVertex = secondVertex
+# ## end testing.
+
+    numSmallCliques = 0;
+    for j=1:length(maximalCliques)
+        if (length(maximalCliques[j]) < maxSize)
+            numSmallCliques = numSmallCliques + 1;
+        else
+            numSmallCliques = numSmallCliques +
+                binomial(length(maximalCliques[j])-2, maxSize-2)
+        end
+    end
+
+    restrictedCliques = Dict()
+    thisSmallClique = 1;
+
+    for j=1:length(maximalCliques)
+        if length(maximalCliques[j]) < maxSize
+            restrictedCliques[thisSmallClique] = maximalCliques[j]
+            thisSmallClique = thisSmallClique + 1;
+        else
+            vertices = maximalCliques[j];
+            subVertices = vertices[findall(x-> (x!= firstVertex) && (x!= secondVertex), vertices)]
+                # all new cliques will contain the edge removed at this filtration
+                # level
+            theseSmallCliques = collect(combinations(subVertices, maxSize-2))
+
+            for k=1:size(theseSmallCliques,1)
+                restrictedCliques[thisSmallClique] = [theseSmallCliques[k,:][1]; firstVertex;  secondVertex];
+                thisSmallClique = thisSmallClique + 1;
+            end
+        end
+    end
+
+    return restrictedCliques
+end
+
+"""----------------------------------------------------------------
+% PRINT CLIQUE LIST TO PERSEUS FILE
+% written by Chad Giusti, 6/2014
+%
+% Output a cell array of cliques in a particular filtration level
+% to the file given by fid in the Perseus non-manifold simplicial complex
+% format: each line corresponds to a single clique, and is given by the
+% size of the clique, then the vertices, then the filtration level
+%
+% INPUT:
+%   cliques: cell array whose elements are positive integer vectors with
+%       entries giving the vertices of cliques in a graph
+%   fid: file into which to print the cliques
+%   filtration: filtration number with which to tag these cliques
+%
+% ----------------------------------------------------------------
+"""
+function print_clique_list_to_perseus_file(cliques, fid, filtration )
+# # ## Testing
+#     cliques = brokenCliqueSets
+#     fid = cliqueFid
+# #     ## end testing
+    for j=1:length(cliques)
+        clique_size = size(cliques[j],1)-1
+        line = string(clique_size, " ")
+
+        for element in cliques[j]
+            line = line*string(element, " ")
+        end
+        line = line*string(i, "\n")
+        write(cliqueFid,line)
+    end
+end
 
 """
  ----------------------------------------------------------------
