@@ -32,3 +32,6 @@ Manifest.toml
 # Ignore movies
 *.avi
 *.mov
+
+# text files created by clique top
+matrix*.txt
