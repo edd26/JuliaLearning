@@ -1,7 +1,10 @@
 using MATLAB
-using LinearAlgebra
-using Match
-include("CliqueTop.jl")
+ using LinearAlgebra
+ using Match
+ using DelimitedFiles
+ using Plots
+ include("../GeometricMatrix.jl")
+ include("CliqueTop.jl")
 
 
 """
@@ -90,15 +93,11 @@ function compute_clique_topology(inputMatrix;
                                     keepFiles = false,
                                     workDirectory = ".",
                                     writeMaxCliques = false,
-                                    algorithm = "naive",
+                                    algorithm = "split",
                                     threads = 1)
 
 # # For testing only:
-# using MATLAB
-#  using DelimitedFiles
-#  using Plots
-#  using LinearAlgebra
-#  include("../GeometricMatrix.jl")
+#
 #
 # matrix_size = 60
 #     reportProgress = false
@@ -111,33 +110,34 @@ function compute_clique_topology(inputMatrix;
 #     writeMaxCliques = false
 #     algorithm = "split"
 #     threads = 1
-# # end testing
+# end testing
 
     # ----------------------------------------------------------------
     # Validate and set parameters
     it_is = false
-    do_not_change = false
+    change_folder = true
 
     current_location = pwd()
     folders = split(current_location, "/")
 
+    # for element in folders
+    #     if element == "JuliaLearning"
+    #         println(element)
+    #         it_is = true
+    #     end
+    # end
     for element in folders
-        if element == "JuliaLearning"
-            println(element)
-            global it_is = true
-        end
-
-        if element == "clique_top_Julia"
-            global do_not_change = true
+        if element == "clique_top_Julia" #&& it_is
+            change_folder = false
         end
     end
 
-    if !it_is
-        println("You are not in the right directory")
-        return
-    end
+    # if !it_is
+    #     println("You are not in the right directory")
+    #     return
+    # end
 
-    if !do_not_change
+    if change_folder
         cd("clique_top_Julia/")
         mat"cd('clique_top_Julia')"
     end
@@ -161,7 +161,7 @@ function compute_clique_topology(inputMatrix;
 
     # ----------------------------------------------------------------
     # If we need Cliquer, make sure the files are compiled
-    if (algorithm == "split")
+if (algorithm == "split")
         if isfile("./clique_top/Neural_Codeware/+Cliquer/FindAll.mexa64")
             println("MEX Cliquer not compiled. Compiling before beginning process.")
 
@@ -240,10 +240,9 @@ function compute_clique_topology(inputMatrix;
                 inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix,...
                 numThreads );"
     elseif algorithm=="split"
-        include("split_cliques_and_write_to_file")
 
-            @time numFiltrations =split_cliques_and_write_to_file(inputMatrix, maxBettiNumber + 2, edgeDensity, filePrefix,writeMaxCliques)
-                mat"tic; split_cliques_and_write_to_file($inputMatrix, $maxBettiNumber + 2, $edgeDensity, $filePrefix,$writeMaxCliques); toc"
+            numFiltrations =split_cliques_and_write_to_file(inputMatrix, maxBettiNumber + 2, edgeDensity, filePrefix,writeMaxCliques)
+                # mat"split_cliques_and_write_to_file($inputMatrix, $maxBettiNumber + 2, $edgeDensity, $filePrefix,$writeMaxCliques)"
 
     end
 
