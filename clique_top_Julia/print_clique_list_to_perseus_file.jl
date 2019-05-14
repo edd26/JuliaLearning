@@ -1,4 +1,4 @@
-#=----------------------------------------------------------------
+"""----------------------------------------------------------------
 % PRINT CLIQUE LIST TO PERSEUS FILE
 % written by Chad Giusti, 6/2014
 %
@@ -13,7 +13,8 @@
 %   fid: file into which to print the cliques
 %   filtration: filtration number with which to tag these cliques
 %
-% ---------------------------------------------------------------- =#
+% ----------------------------------------------------------------
+"""
 function print_clique_list_to_perseus_file(cliques, fid, filtration )
 # # ## Testing
 #     cliques = brokenCliqueSets
@@ -24,7 +25,7 @@ function print_clique_list_to_perseus_file(cliques, fid, filtration )
         line = string(clique_size, " ")
 
         for element in cliques[j]
-            global line = line*string(element, " ")
+            line = line*string(element, " ")
         end
         line = line*string(i, "\n")
         write(cliqueFid,line)
