@@ -58,32 +58,22 @@ for diag_elem in 1:size(C_ij,1)
 end
 
 # Application of clique-top library to the correlation matrix
-ending = 60
+ending = 40
 c_ij_betti_numbers = 0
 random_betti_numbers = 0
 
 # Generate random matrix
 num_of_points = size(C_ij,1)
-elemnts_above_diagonal = Int64(num_of_points*(num_of_points-2))
-random_matrix = zeros(size(C_ij))
-set_of_random_numbers = rand(elemnts_above_diagonal)
-h = 1
-for k in 1:num_of_points
-    for m in k+1:num_of_points
-        random_matrix[k,m] = set_of_random_numbers[h]
-        random_matrix[m,k] = set_of_random_numbers[h]
-       global  h +=1
-    end
-end
+random_matrix = generate_random_matrix(num_of_points)
 
 
-## Copute persistance homology with the MATLAB clique-top library 
+## Copute persistance homology with the MATLAB clique-top library
 println("Computing betti numbers for pairwise correlation matrix.")
-mat"addpath('clique-top'); $c_ij_betti_numbers = compute_clique_topology($C_ij(1:$ending, 1:$ending), 'MaxEdgeDensity', 0.6)"
+ mat"addpath('clique-top'); $c_ij_betti_numbers = compute_clique_topology($C_ij(1:$ending, 1:$ending), 'MaxEdgeDensity', 0.6)"
 
 
 println("Computing betti numbers for pairwise correlation matrix.")
-mat"addpath('clique-top'); $random_betti_numbers = compute_clique_topology($random_matrix(1:$ending, 1:$ending), 'MaxEdgeDensity', 0.7)"
+ mat"addpath('clique-top'); $random_betti_numbers = compute_clique_topology($random_matrix(1:$ending, 1:$ending), 'MaxEdgeDensity', 0.7)"
 
 plot_betti_numbers(random_betti_numbers, "Pairwise correlation  matrix, matrix size $ending")
 
@@ -94,8 +84,21 @@ plot_betti_numbers(c_ij_betti_numbers, "Pairwise correlation  matrix, matrix siz
 
 ## Copute persistance homology with the Eirene library
 
-C = eirene(random_matrix,maxdim=3,model="vr")
+R = eirene(random_matrix,maxdim=3,model="vr")
 
+plotpersistencediagram_pjs(R,dim=1)
+# %%
+betti_0 = betticurve(R, dim=0)
+betti_1 = betticurve(R, dim=1)
+betti_2 = betticurve(R, dim=2)
+betti_3 = betticurve(R, dim=3)
+
+plot(betti_0[:,1], betti_0[:,1], label="beta_0", title="Random matrix Eirene") #, ylims = (0,maxy)
+plot!(betti_1[:,1], betti_1[:,2], label="beta_1")
+plot!(betti_2[:,1], betti_2[:,2], label="beta_2")
+plot!(betti_3[:,1], betti_3[:,2], label="beta_3")
+
+C = eirene(-C_ij,maxdim=3,model="pc")
 plotpersistencediagram_pjs(C,dim=1)
 # %%
 betti_0 = betticurve(C, dim=0)
@@ -107,5 +110,3 @@ plot(betti_0[:,1], betti_0[:,1], label="beta_0", title="Random matrix Eirene") #
 plot!(betti_1[:,1], betti_1[:,2], label="beta_1")
 plot!(betti_2[:,1], betti_2[:,2], label="beta_2")
 plot!(betti_3[:,1], betti_3[:,2], label="beta_3")
-
-C = eirene(random_matrix,maxdim=3,model="vr")
