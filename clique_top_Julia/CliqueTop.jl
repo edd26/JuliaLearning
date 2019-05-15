@@ -20,7 +20,8 @@ using Combinatorics
 
  ----------------------------------------------------------------
 """
-function restrict_max_cliques_to_size(maximalCliques, maxSize, firstVertex,secondVertex)
+function restrict_max_cliques_to_size(maximalCliques, maxSize,
+                                        firstVertex,secondVertex)
 # ## Testing code:
 # maximalCliques = brokenCliqueSets
 # maxSize = maxCliqueSize
@@ -47,9 +48,10 @@ function restrict_max_cliques_to_size(maximalCliques, maxSize, firstVertex,secon
             thisSmallClique = thisSmallClique + 1;
         else
             vertices = maximalCliques[j];
-            subVertices = vertices[findall(x-> (x!= firstVertex) && (x!= secondVertex), vertices)]
-                # all new cliques will contain the edge removed at this filtration
-                # level
+            subVertices = vertices[findall(x-> (x!= firstVertex) &&
+                                                (x!= secondVertex), vertices)]
+                # all new cliques will contain the edge removed at this
+                # filtration level
             theseSmallCliques = collect(combinations(subVertices, maxSize-2))
 
             for k=1:size(theseSmallCliques,1)
@@ -120,7 +122,8 @@ end
        the maximal cliques -- may slow process substantially
 ----------------------------------------------------------------
 """
-function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity, filePrefix, writeMaxCliques)
+function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
+                                                    filePrefix, writeMaxCliques)
 
     # ## Testing code:
     # symMatrix = inputMatrix
@@ -187,7 +190,8 @@ cliqueFid = 0
             end
 
             if writeMaxCliques
-                print_clique_list_to_perseus_file(brokenCliqueSets, cliqueMaxFid, i);
+                print_clique_list_to_perseus_file(brokenCliqueSets,
+                                                            cliqueMaxFid, i);
             end
 
             allBrokenCliques = restrict_max_cliques_to_size(brokenCliqueSets, maxCliqueSize, firstVertex, secondVertex)
@@ -227,4 +231,51 @@ cliqueFid = 0
         # end
     end
     return maxFiltration
+end
+
+
+""" ----------------------------------------------------------------
+ READ PERSISTENCE INTERVAL DISTRIBUTION
+ written by Chad Giusti, 6/2014
+
+ Read the distribution of persistence interval lengths for a
+ particular homological dimension from Perseus output files.
+
+ INPUT:
+   fileName: Name of the file to read, with complete path if not
+       the working directory
+
+ OUTPUT:
+   distribution: An array containing a the distribution of interval
+       lengths. The final element is for "infinite" intervals with
+       no endpoint.
+ -------------------------------------------------------------"""
+function read_persistence_interval_distribution(fileName, numFiltrations)
+    distribution = zeros(1, numFiltrations);
+    infinite_intervals = 0;
+
+    # ----------------------------------------------------------------
+    # Open the file and read the outputs into the array
+
+    if isfile(fileName)
+        try
+            fid = open(fileName, "r")
+            for line in eachline(fid)
+                A = split(line)
+                interval = [parse(Int64, A[1]) parse(Int64, A[2])]
+                # println(interval[end])
+                if (interval[end] == -1)
+                    infinite_intervals = infinite_intervals + 1;
+                else
+                    len = interval[end] - interval[1];
+                    distribution[len] = distribution[len]+1;
+                end
+            end
+            close(fid)
+        catch exception
+            disp(exception.message);
+            rethrow(exception);
+        end
+    end
+    return distribution, infinite_intervals
 end
