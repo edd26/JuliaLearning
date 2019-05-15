@@ -82,11 +82,12 @@ end
 %
  ----------------------------------------------------------------
 """
-function print_clique_list_to_perseus_file(cliques, fid, filtration )
+function print_clique_list_to_perseus_file(cliques, fileName, filtration )
 # # ## Testing
 #     cliques = brokenCliqueSets
 #     fid = cliqueFid
 # #     ## end testing
+    fid = open(fileName, "a")
     for j=1:length(cliques)
         clique_size = size(cliques[j],1)-1
         line = string(clique_size, " ")
@@ -97,7 +98,9 @@ function print_clique_list_to_perseus_file(cliques, fid, filtration )
         line = line*string(filtration, "\n")
         write(fid,line)
     end
+    close(fid)
 end
+
 
 """
  ----------------------------------------------------------------
@@ -127,11 +130,11 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
                                                     filePrefix, writeMaxCliques)
 
     # ## Testing code:
-    symMatrix = inputMatrix
-    maxCliqueSize = maxBettiNumber + 2
-    maxDensity = edgeDensity
-    filePrefix = filePrefix
-    writeMaxCliques = writeMaxCliques
+    # symMatrix = inputMatrix
+    # maxCliqueSize = maxBettiNumber + 2
+    # maxDensity = edgeDensity
+    # filePrefix = filePrefix
+    # writeMaxCliques = writeMaxCliques
     # ## testing end.
 
     matrixSize = size(symMatrix, 1)
@@ -160,22 +163,20 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
     maxCliqueMatrix = 0
     brokenCliqueMatrix = 0
     mat"$maxCliqueMatrix = initialMaxCliques.ToMatrix();"
+    file_cliq_name = "$(filePrefix)_simplices.txt"
+    file_cliq_max_name = "$(filePrefix)_max_simplices.txt"
     cliqueFid = 0
-    
+
     try
-        cliqueFid = open("$(filePrefix)_simplices.txt", "w")
+        cliqueFid = open(file_cliq_name, "w")
         write(cliqueFid,"1\n")
         close(cliqueFid)
-        cliqueFid = open("$(filePrefix)_simplices.txt", "a")
-
 
         if writeMaxCliques
-            cliqueMaxFid = open("$(filePrefix)_max_simplices.txt", "w")
+            cliqueMaxFid = open(file_cliq_max_name, "w")
             write(cliqueMaxFid,"1\n")
             close(cliqueMaxFid)
-            cliqueMaxFid =  open("$(filePrefix)_max_simplices.txt", "a")
         end
-
         ## --------
         for i=length(edgeList):-1:1
             coordinates = findall(x->x==edgeList[i], symMatrix)[1]
@@ -185,21 +186,21 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
             mat"[$maxCliqueMatrix, $brokenCliqueMatrix] =...
                 find_and_split_cliques_containing_edge( $maxCliqueMatrix,...
                 [$firstVertex, $secondVertex] );"
+            # println(size(maxCliqueMatrix))
 
             brokenCliqueSets = Dict()
             for k=1:size(brokenCliqueMatrix,1)
                 brokenCliqueSets[k] =  findall(x->x>0, brokenCliqueMatrix[k,:])
             end
 
-            if writeMaxCliques
-                print_clique_list_to_perseus_file(brokenCliqueSets,
-                                                            cliqueMaxFid, i);
-            end
 
             allBrokenCliques = restrict_max_cliques_to_size(brokenCliqueSets, maxCliqueSize, firstVertex, secondVertex)
-            print_clique_list_to_perseus_file(allBrokenCliques, cliqueFid, i);
+            print_clique_list_to_perseus_file(allBrokenCliques, file_cliq_name, i);
 
-
+            if writeMaxCliques
+                print_clique_list_to_perseus_file(brokenCliqueSets,
+                                                            file_cliq_max_name, i);
+            end
             #=----------------------------------------------------------------
              Ensure all vertices appear on their own in the complex
              ---------------------------------------------------------------=#
@@ -209,28 +210,15 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
                 vertexSet[i] = i * ones(1);
             end
 
-            print_clique_list_to_perseus_file(vertexSet, cliqueFid, 1);
+            print_clique_list_to_perseus_file(vertexSet, file_cliq_name, 1);
 
             if writeMaxCliques
-                print_clique_list_to_perseus_file(vertexSet, cliqueMaxFid, 1);
+                print_clique_list_to_perseus_file(vertexSet, file_cliq_max_name, 1);
             end
+
         end
-        # println("Here1")
-        # close(cliqueFid)
-        # println("Here2")
-        #
-        # if writeMaxCliques
-        #     println("Here")
-        #     close(cliqueMaxFid)
-        # end
     catch
         println("Something went wrong")
-    finally
-        # close(cliqueFid)
-        #
-        # if writeMaxCliques
-        #     close(cliqueMaxFid)
-        # end
     end
     return maxFiltration
 end
@@ -314,38 +302,41 @@ function read_perseus_bettis(fileName, maxFilt, maxDim, betti0 )
 # maxFilt = numFiltrations
 # maxDim = maxBettiNumber
 # betti0 = computeBetti0
+
     # end test
+    bettis = 0
+
     try
         fid = open(fileName, "r")
         lines = readlines(fid)
 
-
         tline = lines[2] # get first line and extract number of columns
         # Get rid of white spaces at the beginning and at the end
-        while tline[end] == ' '
-            tline = tline[1:end-1]
-        end
-        while tline[1] == ' '
-            tline = tline[2:end]
-        end
+        # while tline[end] == ' '
+        tline = tline[1:end-1]
+        # end
+        # while tline[1] == ' '
+        tline = tline[2:end]
+        # end
         elements = split(tline, " ")
         close(fid)
 
         numCols = size(elements,1)
         numRows = size(lines, 1) - 1
-        bettis = zeros(Int64, maxFilt,numCols - 1)
+        bettis = zeros(Int64, maxFilt, numCols - 1)
 
         fid = open(fileName, "r")
+
         row = 1
         for line in eachline(fid)
+
             if length(line) <= 1
                 # skip
             else
-                line = lines[3]
                 line = line[2:end-1]
-                elements = split(tline, " ")
+                elements = split(line, " ")
                 for j = 2:numCols
-                    bettis[row, j-1] = parse(Int64, elements[j-1])
+                    bettis[row, j-1] = parse(Int64, elements[j])
                 end
                 row += 1
             end
@@ -367,7 +358,6 @@ function read_perseus_bettis(fileName, maxFilt, maxDim, betti0 )
             bettis[i,:] = bettis[i-1,:];
         end
     end
-
      # ----------------------------------------------------------------
      # Drop the Betti 0 information if indicated.
      # ----------------------------------------------------------------
@@ -377,5 +367,5 @@ function read_perseus_bettis(fileName, maxFilt, maxDim, betti0 )
     else
         bettis = bettis[:,2:min(maxDim+1, size(bettis,2))];
     end
-return bettis
+    return bettis
 end
