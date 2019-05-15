@@ -94,12 +94,13 @@ function compute_clique_topology(inputMatrix;
                                     workDirectory = ".",
                                     writeMaxCliques = false,
                                     algorithm = "split",
-                                    threads = 1)
+                                    threads = 1,
+                                    delete_existing_files = true)
 
 # # For testing only:
 #
-#
-# matrix_size = 60
+
+# matrix_size = 40
 #     reportProgress = false
 #     maxBettiNumber = 3
 #     edgeDensity = .6
@@ -110,6 +111,7 @@ function compute_clique_topology(inputMatrix;
 #     writeMaxCliques = false
 #     algorithm = "split"
 #     threads = 1
+#     delete_existing_files = true
 # end testing
 
     # ----------------------------------------------------------------
@@ -136,11 +138,16 @@ function compute_clique_topology(inputMatrix;
     #     println("You are not in the right directory")
     #     return
     # end
-
-    if change_folder
-        cd("clique_top_Julia/")
-        mat"cd('clique_top_Julia')"
-    end
+    try
+        if change_folder
+            cd("clique_top_Julia/")
+            mat"cd('clique_top_Julia')"
+        end
+    catch y
+       println("Can not enter clique_top_Julia")
+       println("Currentlny in folder:")
+       println(pwd())
+   end
 
     # geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
     # inputMatrix = geometric_matrix[1:matrix_size,1:matrix_size]
@@ -161,7 +168,7 @@ function compute_clique_topology(inputMatrix;
 
     # ----------------------------------------------------------------
     # If we need Cliquer, make sure the files are compiled
-if (algorithm == "split")
+    if (algorithm == "split")
         if isfile("./clique_top/Neural_Codeware/+Cliquer/FindAll.mexa64")
             println("MEX Cliquer not compiled. Compiling before beginning process.")
 
@@ -199,18 +206,39 @@ if (algorithm == "split")
     try
         cd(workDirectory);
         if isfile(workDirectory * "/" * filePrefix * "_max_simplices.txt")
-            error("File $(filePrefix)_max_simplices.txt already exists in directory $(workDirectory).");
+            if delete_existing_files
+                println("File $(filePrefix)_max_simplices.txt already exists but will be removed")
+                run(`rm $(filePrefix)_max_simplices.txt`)
+            else
+                error("File $(filePrefix)_max_simplices.txt already exists in directory $(workDirectory).");
+            end
+
         end
         if isfile(workDirectory * "/" * filePrefix * "_simplices.txt")
-            error("File $(filePrefix)_simplices.txt already exists in directory $(workDirectory).");
+            if delete_existing_files
+                println("File $(filePrefix)_simplices.txt already exists but will be removed")
+                run(`rm $(filePrefix)_simplices.txt`)
+            else
+                error("File $(filePrefix)_simplices.txt already exists in directory $(workDirectory).");
+            end
         end
         if isfile(workDirectory * "/" * filePrefix * "_homology_betti.txt")
-            error("File $(filePrefix)_homology_betti.txt already exists in directory $(workDirectory).");
+            if delete_existing_files
+                println("File $(filePrefix)_homology_betti.txt already exists but will be removed")
+                run(`rm $(filePrefix)_homology_betti.txt`)
+            else
+                error("File $(filePrefix)_homology_betti.txt already exists in directory $(workDirectory).");
+            end
         end
 
         for d=0:maxBettiNumber+1
             if isfile(workDirectory * "/" * filePrefix * "_homology_" * string(d) *  ".txt")
-                error("File ($filePrefix)_homology_($d).txt already exists in directory ($workDirectory).");
+                if delete_existing_files
+                    println("File $(filePrefix)_homology_$(d).txt already exists but will be removed")
+                    run(`rm $(filePrefix)_homology_$(d).txt`)
+                else
+                    error("File ($filePrefix)_homology_($d).txt already exists in directory ($workDirectory).");
+                end
             end
         end
     catch exception
@@ -228,22 +256,19 @@ if (algorithm == "split")
     end
 
     if algorithm == "combine"
-            mat"numFiltrations = combine_cliques_and_write_to_file(...
-                inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix,...
-                writeMaxCliques);"
+        mat"numFiltrations = combine_cliques_and_write_to_file(...
+            inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix,...
+            writeMaxCliques);"
     elseif algorithm=="naive"
-            mat"numFiltrations = naive_enumerate_cliques_and_write_to_file(...
-                inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix);"
+        mat"numFiltrations = naive_enumerate_cliques_and_write_to_file(...
+            inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix);"
     elseif algorithm=="parnaive"
-            mat"numFiltrations = ...
-                parallel_naive_enumerate_cliques_and_write_to_file(...
-                inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix,...
-                numThreads );"
+        mat"numFiltrations = ...
+            parallel_naive_enumerate_cliques_and_write_to_file(...
+            inputMatrix, maxBettiNumber + 2, maxEdgeDensity, filePrefix,...
+            numThreads );"
     elseif algorithm=="split"
-
-            numFiltrations =split_cliques_and_write_to_file(inputMatrix, maxBettiNumber + 2, edgeDensity, filePrefix,writeMaxCliques)
-                # mat"split_cliques_and_write_to_file($inputMatrix, $maxBettiNumber + 2, $edgeDensity, $filePrefix,$writeMaxCliques)"
-
+        numFiltrations = split_cliques_and_write_to_file(inputMatrix, maxBettiNumber + 2, edgeDensity, filePrefix,writeMaxCliques)
     end
 
     # ----------------------------------------------------------------
@@ -276,37 +301,37 @@ if (algorithm == "split")
     # Assemble the results of the computation for output
     matrixSize = size(inputMatrix, 1)
     edgeDensities = (1:numFiltrations) / binomial(matrixSize,2)
+    bettiCurves = 0
+    persistenceIntervals = 0
+    unboundedIntervals = 0
 
     try
-        bettiCurves = mat"read_perseus_bettis(sprintf('%s_homology_betti.txt',...
-            $filePrefix), $numFiltrations, $maxBettiNumber, $computeBetti0);"
-
+        fileName = "$(filePrefix)_homology_betti.txt"
+        bettiCurves = read_perseus_bettis(fileName, numFiltrations,
+                                                    maxBettiNumber, computeBetti0)
+        # mat"read_perseus_bettis(, $numFiltrations, $maxBettiNumber, $computeBetti0);"
+#
         if computeBetti0
             persistenceIntervals = zeros(Int64(numFiltrations), maxBettiNumber+1);
             unboundedIntervals = zeros(1,maxBettiNumber+1);
 
             for d=0:maxBettiNumber
-                persistenceIntervals[:,d+1], unboundedIntervals[d+1] = mat" read_persistence_interval_distribution(...
-                sprintf('%s_homology_%i.txt', $filePrefix, $d), ...
-                $numFiltrations)"
+                fileName = ("$(filePrefix)_homology_$d.txt")
+                A = read_persistence_interval_distribution(fileName, numFiltrations)
+                persistenceIntervals[:,d] = A[1]
+                unboundedIntervals[d] = A[2]
             end
         else
             persistenceIntervals = zeros(Int64(numFiltrations), maxBettiNumber);
             unboundedIntervals = zeros(1,maxBettiNumber);
 
             for d=1:Int64(maxBettiNumber)
-                # A[:,d], B = mat" read_persistence_interval_distribution(...
-                # sprintf('%s_homology_%i.txt', $filePrefix, $d), ...
-                # $numFiltrations)"
-                # persistenceIntervals[:,d] = A
-                # unboundedIntervals[d] = B
-                mat"[$persistenceIntervals(:,$d), $unboundedIntervals($d) ] =...
-                        read_persistence_interval_distribution(...
-                        sprintf('%s_homology_%i.txt', $filePrefix, $d), ...
-                        $numFiltrations);"
+                fileName = ("$(filePrefix)_homology_$d.txt")
+                A = read_persistence_interval_distribution(fileName, numFiltrations)
+                persistenceIntervals[:,d] = A[1]
+                unboundedIntervals[d] = A[2]
             end
         end
-
     catch exception
         # println(exception.message);
         println("Failure to read Perseus output files. This error has likely occurred due to the Perseus process aborting due to memory limitations. It may be possible to circumvent this difficulty by reducing either the maximum Betti number or the maximum edge density computed. Please see the CliqueTop documentation for details.");
@@ -345,7 +370,6 @@ if (algorithm == "split")
             rethrow(exception);
         end
     end
-
 
     return bettiCurves, edgeDensities, persistenceIntervals, unboundedIntervals
 end
