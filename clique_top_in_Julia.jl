@@ -13,8 +13,6 @@ ending = 80
 # println("Computing betti numbers for geometric matrix with $(ending)x$ending matrix.")
  # mat"$geom_betti_numbers = compute_clique_topology($geometric_matrix(1:$ending, 1:$ending), 'Algorithm', 'split');"
 
-# TODO ERROR: UndefVarError: bettiCurves not defined
-# TODO Step by step comparison, file output comparison
 @time bettiCurves, edgeDensities, persistenceIntervals, unboundedIntervals = compute_clique_topology(geometric_matrix[1:ending, 1:ending])
 plot_betti_numbers(bettiCurves, "Geometric  matrix, matrix size $ending")
 
