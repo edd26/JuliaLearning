@@ -129,7 +129,7 @@ function compute_clique_topology(inputMatrix;
     #     end
     # end
     for element in folders
-        if element == "clique_top_Julia" #&& it_is
+        if occursin("clique_top_Julia", element) #&& it_is
             change_folder = false
         end
     end
@@ -141,7 +141,8 @@ function compute_clique_topology(inputMatrix;
     try
         if change_folder
             cd("clique_top_Julia/")
-            mat"cd('clique_top_Julia')"
+            # mat"cd('clique_top_Julia')"
+            # mat"pwd"
         end
     catch y
        println("Can not enter clique_top_Julia")
