@@ -1,4 +1,5 @@
 using Combinatorics
+using DelimitedFiles
 
 """----------------------------------------------------------------
  RESTRICT CLIQUES TO SIZE
@@ -65,21 +66,21 @@ function restrict_max_cliques_to_size(maximalCliques, maxSize,
 end
 
 """----------------------------------------------------------------
-% PRINT CLIQUE LIST TO PERSEUS FILE
-% written by Chad Giusti, 6/2014
+ PRINT CLIQUE LIST TO PERSEUS FILE
+ written by Chad Giusti, 6/2014
 %
-% Output a cell array of cliques in a particular filtration level
-% to the file given by fid in the Perseus non-manifold simplicial complex
-% format: each line corresponds to a single clique, and is given by the
-% size of the clique, then the vertices, then the filtration level
+ Output a cell array of cliques in a particular filtration level
+ to the file given by fid in the Perseus non-manifold simplicial complex
+ format: each line corresponds to a single clique, and is given by the
+ size of the clique, then the vertices, then the filtration level
 %
-% INPUT:
-%   cliques: cell array whose elements are positive integer vectors with
-%       entries giving the vertices of cliques in a graph
-%   fid: file into which to print the cliques
-%   filtration: filtration number with which to tag these cliques
+ INPUT:
+   cliques: cell array whose elements are positive integer vectors with
+       entries giving the vertices of cliques in a graph
+   fid: file into which to print the cliques
+   filtration: filtration number with which to tag these cliques
 %
-% ----------------------------------------------------------------
+ ----------------------------------------------------------------
 """
 function print_clique_list_to_perseus_file(cliques, fid, filtration )
 # # ## Testing
@@ -126,11 +127,11 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
                                                     filePrefix, writeMaxCliques)
 
     # ## Testing code:
-    # symMatrix = inputMatrix
-    # maxCliqueSize = maxBettiNumber + 2
-    # maxDensity = edgeDensity
-    # filePrefix = filePrefix
-    # writeMaxCliques = writeMaxCliques
+    symMatrix = inputMatrix
+    maxCliqueSize = maxBettiNumber + 2
+    maxDensity = edgeDensity
+    filePrefix = filePrefix
+    writeMaxCliques = writeMaxCliques
     # ## testing end.
 
     matrixSize = size(symMatrix, 1)
@@ -151,15 +152,16 @@ function split_cliques_and_write_to_file(symMatrix, maxCliqueSize, maxDensity,
     end
 
     #=----------------------------------------------------------------
-    % Count cliques in the family of graphs obtained by thresholding
-    % the input matrix at every density in [0, maxDensity], and write
-    % these to files in a format useable by Perseus to compute
-    % persistent homology.
-    % --------------------------------------------------------------=#
+     Count cliques in the family of graphs obtained by thresholding
+     the input matrix at every density in [0, maxDensity], and write
+     these to files in a format useable by Perseus to compute
+     persistent homology.
+     --------------------------------------------------------------=#
     maxCliqueMatrix = 0
     brokenCliqueMatrix = 0
     mat"$maxCliqueMatrix = initialMaxCliques.ToMatrix();"
-cliqueFid = 0
+    cliqueFid = 0
+    
     try
         cliqueFid = open("$(filePrefix)_simplices.txt", "w")
         write(cliqueFid,"1\n")
@@ -199,8 +201,8 @@ cliqueFid = 0
 
 
             #=----------------------------------------------------------------
-            % Ensure all vertices appear on their own in the complex
-            % ---------------------------------------------------------------=#
+             Ensure all vertices appear on their own in the complex
+             ---------------------------------------------------------------=#
 
             vertexSet = Dict()
             for i=1:matrixSize
@@ -273,9 +275,107 @@ function read_persistence_interval_distribution(fileName, numFiltrations)
             end
             close(fid)
         catch exception
-            disp(exception.message);
+            # disp(exception.message);
             rethrow(exception);
         end
     end
     return distribution, infinite_intervals
+end
+
+
+"""
+ ----------------------------------------------------------------
+ READ PERSEUS BETTIS
+ written by Chad Giusti, 6/2014
+%
+ Read the betti numbers output by Perseus into an integer array
+%
+ INPUT:
+   fileName: Name of the file to read, with complete path if not
+       the working directory
+   maxFilt: Maximum filtration level/frame from which to read
+       simplices from. The function will read inputs in the
+       range 1-maxFilt.
+   maxDim: The maximum Betti number to read
+   betti0: Boolean flag indicating whether to discard Betti 0.
+%
+ OUTPUT:
+   bettis: A maxFilt x maxDim array of integers whose (i,j)
+       entry is the number of cycles of dim j appearing
+       in the ith filtration level. If betti0 is true, the array
+       is instead maxFilt x (maxDim+1) and cycles of dim j
+       are recorded in column j+1.
+%
+ ----------------------------------------------------------------"""
+function read_perseus_bettis(fileName, maxFilt, maxDim, betti0 )
+
+    # Tet code:
+# fileName = fileName
+# maxFilt = numFiltrations
+# maxDim = maxBettiNumber
+# betti0 = computeBetti0
+    # end test
+    try
+        fid = open(fileName, "r")
+        lines = readlines(fid)
+
+
+        tline = lines[2] # get first line and extract number of columns
+        # Get rid of white spaces at the beginning and at the end
+        while tline[end] == ' '
+            tline = tline[1:end-1]
+        end
+        while tline[1] == ' '
+            tline = tline[2:end]
+        end
+        elements = split(tline, " ")
+        close(fid)
+
+        numCols = size(elements,1)
+        numRows = size(lines, 1) - 1
+        bettis = zeros(Int64, maxFilt,numCols - 1)
+
+        fid = open(fileName, "r")
+        row = 1
+        for line in eachline(fid)
+            if length(line) <= 1
+                # skip
+            else
+                line = lines[3]
+                line = line[2:end-1]
+                elements = split(tline, " ")
+                for j = 2:numCols
+                    bettis[row, j-1] = parse(Int64, elements[j-1])
+                end
+                row += 1
+            end
+        end
+        close(fid)
+    catch exception
+        # disp(exception.message);
+        rethrow(exception);
+    end
+
+     # ----------------------------------------------------------------
+     # Perseus does not output data for filtrations where nothing changes
+     # homologically. Fill these in in the matrix -- detect by checking
+     # that betti 0 is zero.
+     # ----------------------------------------------------------------
+
+    for i=2:maxFilt
+        if bettis[i,1] == 0
+            bettis[i,:] = bettis[i-1,:];
+        end
+    end
+
+     # ----------------------------------------------------------------
+     # Drop the Betti 0 information if indicated.
+     # ----------------------------------------------------------------
+
+    if betti0
+        bettis = bettis[:,1:min(maxDim+1, size(bettis,2))];
+    else
+        bettis = bettis[:,2:min(maxDim+1, size(bettis,2))];
+    end
+return bettis
 end
