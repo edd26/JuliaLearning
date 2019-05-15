@@ -102,12 +102,12 @@ function generate_set_of_graphs(matrix_size, matrix_ordering)
     return set_of_graphs, edge_density
 end
 
-function plot_betti_numbers(betti_numbers, title="Geometric  matrix")
-    x_values = range(0,stop=0.6,length=size(betti_numbers)[1])
+function plot_betti_numbers(betti_numbers, edge_density, title="Geometric  matrix"; stop=0.6)
+    p1 = plot(edge_density, betti_numbers[:,1], label="beta_0", title=title, legend=:topleft) #, ylims = (0,maxy)
+    plot!(edge_density, betti_numbers[:,2], label="beta_1")
+    plot!(edge_density, betti_numbers[:,3], label="beta_2")
 
-    plot(x_values, betti_numbers[:,1], label="beta_0", title=title) #, ylims = (0,maxy)
-    plot!(x_values, betti_numbers[:,2], label="beta_1")
-    plot!(x_values, betti_numbers[:,3], label="beta_2")
+    return p1
 end
 
 function save_matrix_to_file(matrix, filename)
