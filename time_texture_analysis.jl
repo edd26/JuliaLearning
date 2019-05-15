@@ -2,6 +2,8 @@ using MATLAB
  using StatsBase
  using Plots
  include("VideoManage.jl")
+ include("GeometricMatrix.jl")
+ include("clique_top_Julia/clique_top.jl")
 
 @enum VIDEO candle=1 water=2 checkboard=3 coral_reef=4
 
