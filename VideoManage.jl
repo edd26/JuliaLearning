@@ -126,9 +126,9 @@ time) the set of vectors is returned, in which each row is a pixel, and each
 column is the value of the pixel in n-th frame.
 """
 function vectorize_video(video)
-    video_length = size(extracted_pixels, 3)
-    rows = size(extracted_pixels,1)
-    columns = size(extracted_pixels,2)
+    video_length = size(video, 3)
+    rows = size(video,1)
+    columns = size(video,2)
 
     number_of_vectors = rows*columns
 
@@ -137,7 +137,7 @@ function vectorize_video(video)
     index = 1;
     for row=1:rows
         for column=1:columns
-            vectorized_video[index,:] = extracted_pixels[row, column,:];
+            vectorized_video[index,:] = video[row, column,:];
             index = index+1;
         end
     end
