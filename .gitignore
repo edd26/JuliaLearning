@@ -35,3 +35,6 @@ Manifest.toml
 
 # text files created by clique top
 matrix*.txt
+
+# Images
+*.png
