@@ -3,7 +3,9 @@ using Plots
  # using Eirene
  include("VideoManage.jl")
  include("GeometricMatrix.jl")
- include("clique_top_Julia/clique_top.jl")
+ include("clique_top_Julia/CliqueTop.jl")
+
+ do_eirene = false
 
 function do_sth()
    VIDEO = (diag_1=1,
@@ -24,103 +26,106 @@ function do_sth()
     results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/"
     inverse = -1
 
- for mm = 1:2
-   inverse = inverse*(-1)
-   for choice = 1:7
-      # -----------------------------------------------------------------------------
-       ## Process Image
-      if choice == VIDEO.diag_1
-          video_name = "diag_strip_30sec_1.mov"
-       elseif choice == VIDEO.diag_2
-          video_name = "diag_strip_30sec_2.mov"
-       elseif choice == VIDEO.diag_g1
-          video_name = "diag_strip_30sec_gray_1.mov"
-       elseif choice == VIDEO.diag_g2
-          video_name = "diag_strip_30sec_gray_2.mov"
-       elseif choice == VIDEO.diag_gb
-          video_name = "diag_strip_30sec_gray_both.mov"
-       elseif choice == VIDEO.diag_dbl
-          video_name = "diag_strip_30sec_single_dbl_gaps.mov"
-       elseif choice == VIDEO.horiz
-          video_name = "horiz_strip_30sec.mov"
-       end
-       println("Selected video: $(video_name)")
+    mat"fprintf('testing engine')"
 
-      video_array = get_video_array_from_file(video_path*video_name)
-      video_dimensions = get_video_dimension(video_array)
-      indicies_set = get_video_mask(points_per_dim, video_dimensions)
-      extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
-      vectorized_video = vectorize_video(extracted_pixels_matrix)
-      println("Video is vectorized, proceeding to Pairwise correlation.")
+    for mm = 1:2
+      inverse = inverse*(-1)
+      for choice = 1:7
+         # -----------------------------------------------------------------------------
+          ## Process Image
+         if choice == VIDEO.diag_1
+             video_name = "diag_strip_30sec_1.mov"
+          elseif choice == VIDEO.diag_2
+             video_name = "diag_strip_30sec_2.mov"
+          elseif choice == VIDEO.diag_g1
+             video_name = "diag_strip_30sec_gray_1.mov"
+          elseif choice == VIDEO.diag_g2
+             video_name = "diag_strip_30sec_gray_2.mov"
+          elseif choice == VIDEO.diag_gb
+             video_name = "diag_strip_30sec_gray_both.mov"
+          elseif choice == VIDEO.diag_dbl
+             video_name = "diag_strip_30sec_single_dbl_gaps.mov"
+          elseif choice == VIDEO.horiz
+             video_name = "horiz_strip_30sec.mov"
+          end
+          println("Selected video: $(video_name)")
+
+         video_array = get_video_array_from_file(video_path*video_name)
+         video_dimensions = get_video_dimension(video_array)
+         indicies_set = get_video_mask(points_per_dim, video_dimensions)
+         extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
+         vectorized_video = vectorize_video(extracted_pixels_matrix)
+         println("Video is vectorized, proceeding to Pairwise correlation.")
 
 
 
 
-      # -----------------------------------------------------------------------------
-      ## Compute pairwise correlation
-      C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
-      # log_C_ij = map(log10, map(abs,C_ij))
+         # -----------------------------------------------------------------------------
+         ## Compute pairwise correlation
+         C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
+         # log_C_ij = map(log10, map(abs,C_ij))
 
-      # set the diagonal to zero
-      for diag_elem in 1:size(C_ij,1)
-         C_ij[diag_elem,diag_elem] = 0
+         # set the diagonal to zero
+         for diag_elem in 1:size(C_ij,1)
+            C_ij[diag_elem,diag_elem] = 0
+         end
+
+
+
+
+
+
+
+
+
+         println("Pairwise correlation is finished, proceeding to persistance homology.")
+         # -----------------------------------------------------------------------------
+         # Compute persistance homology with CliqueTopJulia
+         size_limiter = size(C_ij,1)
+
+
+         ## Copute persistance homology with the Julia version of clique-top library
+         @time c_ij_betti_num, edge_density, persistence_intervals, unbounded_intervals =
+                           compute_clique_topology(inverse.*C_ij[1:size_limiter, 1:size_limiter],
+                                                   edgeDensity = 0.8)
+
+
+
+         # TODO Compare the Eirene with clique top results
+         # TODO Test the influence of parameters at the betti curves
+
+
+
+
+         # -----------------------------------------------------------------------------
+         # Plot results
+         if plot_all_figrues
+            betti_numbers = c_ij_betti_num
+            title = "Betti curves for pairwise correlation matrix, matrix size $size_limiter"
+            p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
+
+
+            heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(video_name), number of points: $points_per_dim");
+
+            final_plot_ref = plot(p1, heat_map1, layout = (2,1))
+            # plot(p1, heat_map1, layout = (2))
+
+
+         end
+
+         if save_figures
+            cd("/home/ed19aaf/Programming/Julia/JuliaLearning")
+            name = split(video_name, ".")[1]
+            savefig(final_plot_ref, results_path*string(inverse)*name*"_results.png")
+         end
+
       end
-
-
-
-
-
-
-
-
-
-      println("Pairwise correlation is finished, proceeding to persistance homology.")
-      # -----------------------------------------------------------------------------
-      # Compute persistance homology with CliqueTopJulia
-      size_limiter = size(C_ij,1)
-
-
-      ## Copute persistance homology with the Julia version of clique-top library
-      @time c_ij_betti_num, edge_density, persistence_intervals, unbounded_intervals =
-                        compute_clique_topology(inverse.*C_ij[1:size_limiter, 1:size_limiter],
-                                                edgeDensity = 0.8)
-
-
-
-      # TODO Compare the Eirene with clique top results
-      # TODO Test the influence of parameters at the betti curves
-
-
-
-
-      # -----------------------------------------------------------------------------
-      # Plot results
-      if plot_all_figrues
-         betti_numbers = c_ij_betti_num
-         title = "Betti curves for pairwise correlation matrix, matrix size $size_limiter"
-         p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
-
-
-         heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(video_name), number of points: $points_per_dim");
-
-         final_plot_ref = plot(p1, heat_map1, layout = (2,1))
-         # plot(p1, heat_map1, layout = (2))
-
-
-      end
-
-      if save_figures
-         cd("/home/ed19aaf/Programming/Julia/JuliaLearning")
-         name = split(video_name, ".")[1]
-         savefig(final_plot_ref, results_path*string(inverse)*name*"_results.png")
-      end
-
    end
+   println("-------------------------------------")
 end
-end
 
 
-
+# do_sth()
 
 
 
