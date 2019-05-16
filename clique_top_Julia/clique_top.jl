@@ -99,7 +99,7 @@ function compute_clique_topology(inputMatrix;
 
 # # For testing only:
 #
-
+#
 # matrix_size = 40
 #     reportProgress = false
 #     maxBettiNumber = 3
@@ -112,6 +112,9 @@ function compute_clique_topology(inputMatrix;
 #     algorithm = "split"
 #     threads = 1
 #     delete_existing_files = true
+#
+#     geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
+#     inputMatrix = geometric_matrix[1:matrix_size,1:matrix_size]
 # end testing
 
     # ----------------------------------------------------------------
@@ -122,27 +125,17 @@ function compute_clique_topology(inputMatrix;
     current_location = pwd()
     folders = split(current_location, "/")
 
-    # for element in folders
-    #     if element == "JuliaLearning"
-    #         println(element)
-    #         it_is = true
-    #     end
-    # end
     for element in folders
         if occursin("clique_top_Julia", element) #&& it_is
             change_folder = false
         end
     end
 
-    # if !it_is
-    #     println("You are not in the right directory")
-    #     return
-    # end
     try
         if change_folder
             cd("clique_top_Julia/")
-            # mat"cd('clique_top_Julia')"
-            # mat"pwd"
+            mat"cd('clique_top_Julia')"
+            mat"pwd"
         end
     catch y
        println("Can not enter clique_top_Julia")
@@ -150,8 +143,7 @@ function compute_clique_topology(inputMatrix;
        println(pwd())
    end
 
-    # geometric_matrix = readdlm( "geometric_matrix.csv",  ',', Float64, '\n')
-    # inputMatrix = geometric_matrix[1:matrix_size,1:matrix_size]
+
 
     baseDirectory = pwd()
     functionLocation = baseDirectory*"/compute_clique_topology.m"
