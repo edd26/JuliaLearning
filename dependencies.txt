@@ -5,12 +5,19 @@ Packages for julia:
 
 DataFrames
 Plots
-WebIO
 LightGraphs
 GraphPlot
 Eirene
 Distances
 MATLAB
+VideoIO
+Makie
+Combinatorics
+DelimitedFiles
+Random
+StatsBase
+Match
+
 
 If the graphs are not displayed in the jupyter notebook,
 nb extensions
