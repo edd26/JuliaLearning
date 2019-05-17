@@ -188,3 +188,25 @@ function get_pairwise_correlation_matrix(vectorized_video, tau_max=25)
 
     return C_ij
 end
+
+
+function get_average_from_tiles(extracted_pixels_matrix, N)
+    # N = size(extracted_pixels,1)
+    num_frames = size(extracted_pixels_matrix,3)
+    mask_matrix = ones(N, N)
+    result_matrix = zeros(N, N, num_frames)
+    col_index = 1
+    row_index = 1
+
+    for frame = 1:num_frames
+        for col = 1:N:N^2
+            for row = 1:N:N^2
+                result_matrix[mod(col,N), mod(row,N), frame] =
+                        dot(extracted_pixels_matrix[col:(col+N-1), row:(row+N-1), frame], mask_matrix) ./N^2
+                row_index += 1
+            end
+            col_index += 1
+        end
+    end
+    return result_matrix
+end
