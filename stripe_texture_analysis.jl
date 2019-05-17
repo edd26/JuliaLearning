@@ -2,25 +2,37 @@ using Plots
  using MATLAB
  using Eirene
  include("VideoManage.jl")
- include("GeometricMatrix.jl")
+ include("MatrixToolbox.jl")
  include("clique_top_Julia/CliqueTop.jl")
-
+ VIDEO = (diag_1=1,
+             diag_2=2,
+             diag_g1=3,
+             diag_g2=4,
+             diag_gb=5,
+             diag_dbl=6,
+             horiz=7)
 
 function doit(;do_clique_top = false,
                do_eirene = true,
                choice = VIDEO.diag_gb,
                save_figures = true,
-               plot_all_figrues = true,
+               plot_betti_figrues = true,
+               plot_vectorized_video = false,
                tau_max = 5,
                points_per_dim = 9)
 
-   VIDEO = (diag_1=1,
-               diag_2=2,
-               diag_g1=3,
-               diag_g2=4,
-               diag_gb=5,
-               diag_dbl=6,
-               horiz=7)
+   #debug code, should not be reached when function is launched
+ if false
+    do_clique_top = false
+    do_eirene = true
+    choice = VIDEO.diag_gb
+    save_figures = true
+    plot_betti_figrues = true
+    plot_vectorized_video = false
+    tau_max = 5
+    points_per_dim = 9
+ end
+
    video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
    results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/"
    results_eirene = "/home/ed19aaf/Programming/Julia/JuliaLearning/results_eirene/"
@@ -55,6 +67,16 @@ function doit(;do_clique_top = false,
       vectorized_video = vectorize_video(extracted_pixels_matrix)
       println("Video is vectorized, proceeding to Pairwise correlation.")
 
+      if plot_vectorized_video
+         vector_plot_ref = heatmap(vectorized_video, color=:grays)
+         if save_figures
+            path_to_save = ("/home/ed19aaf/Programming/Julia/JuliaLearning/results_vectorized_video/")
+            name = split(video_name, ".")[1]
+            savefig(final_plot_ref, path_to_save*name*"vec_vid.png")
+
+         end
+      end
+end
 
       # -----------------------------------------------------------------------------
       ## Compute pairwise correlation
@@ -81,7 +103,7 @@ function doit(;do_clique_top = false,
 
          # --------------------------------------------------------------------
          # Plot results
-         if plot_all_figrues
+         if plot_betti_figrues
             betti_numbers = c_ij_betti_num
             title = "Betti curves for pairwise correlation matrix, matrix size $size_limiter"
             p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
@@ -92,6 +114,7 @@ function doit(;do_clique_top = false,
             final_plot_ref = plot(p1, heat_map1, layout = (2,1))
             # plot(p1, heat_map1, layout = (2))
          end
+
 
          if save_figures
             cd("/home/ed19aaf/Programming/Julia/JuliaLearning")
@@ -109,7 +132,7 @@ function doit(;do_clique_top = false,
          # plotpersistencediagram_pjs(C,dim=1)
 
 
-         if plot_all_figrues
+         if plot_betti_figrues
             betti_0 = betticurve(C, dim=0)
             betti_1 = betticurve(C, dim=1)
             betti_2 = betticurve(C, dim=2)
