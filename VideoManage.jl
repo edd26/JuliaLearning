@@ -194,7 +194,7 @@ end
     get_average_from_tiles(extracted_pixels_matrix, N)
 
 Fnction takes a 3D array in which video is stored and splits every frame into
-non overlaping tiles of size NxN. If size of @extracted_pixels_matrix is not square of N, then only N^2 x N^2 matrix will be used for averaging. 
+non overlaping tiles of size NxN. If size of @extracted_pixels_matrix is not square of N, then only N^2 x N^2 matrix will be used for averaging.
 """
 function get_average_from_tiles(extracted_pixels_matrix, N)
     # N = size(extracted_pixels,1)

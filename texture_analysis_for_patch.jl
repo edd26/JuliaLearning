@@ -64,8 +64,9 @@ function doit(;do_clique_top = true,
       video_dimensions = get_video_dimension(video_array)
       indicies_set = [collect(1:points_per_dim^2) collect(1:points_per_dim^2)]'
       extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
-      tile_averaged = get_average_from_tiles(extracted_pixels_matrix, points_per_dim)
-      vectorized_video = vectorize_video(tile_averaged)
+      # tile_averaged = get_average_from_tiles(extracted_pixels_matrix, points_per_dim)
+      # heatmap(extracted_pixels_matrix[:,:,50], color=:grays)
+      vectorized_video = vectorize_video(extracted_pixels_matrix)
       println("Video is vectorized, proceeding to Pairwise correlation.")
 
       if plot_vectorized_video
@@ -91,6 +92,7 @@ function doit(;do_clique_top = true,
       println("Pairwise correlation is finished, proceeding to persistance homology.")
 
       if do_clique_top
+         println("Starting CliqueTop.")
          # -----------------------------------------------------------------------------
          # Compute persistance homology with CliqueTopJulia
          if size_limiter == 0
@@ -101,10 +103,11 @@ function doit(;do_clique_top = true,
          @time c_ij_betti_num, edge_density, persistence_intervals, unbounded_intervals =
                            compute_clique_topology(C_ij[1:size_limiter, 1:size_limiter],
                                                    edgeDensity = 0.8)
-
+         println("Computations are finished.")
          # --------------------------------------------------------------------
          # Plot results
          if plot_betti_figrues
+            println("Creating plots.")
             betti_numbers = c_ij_betti_num
             title = "Betti curves for pairwise correlation matrix, matrix size $size_limiter"
             p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
@@ -118,6 +121,7 @@ function doit(;do_clique_top = true,
 
 
          if save_figures
+            println("Saving plots.")
             cd("/home/ed19aaf/Programming/Julia/JuliaLearning")
             name = split(video_name, ".")[1]
             savefig(final_plot_ref, results_path*name*"_size$(size_limiter)"*"_tau$(tau_max)"*".png")
@@ -127,6 +131,7 @@ function doit(;do_clique_top = true,
    ## --------------------------------------------------------
    # Copute persistance homology with the Eirene library
       if do_eirene
+         println("Startint Eirene homology")
          size_limiter = size(C_ij,1)
 
          C = eirene(C_ij[1:size_limiter, 1:size_limiter],maxdim=3,model="vr")
