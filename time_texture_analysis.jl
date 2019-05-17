@@ -11,6 +11,7 @@ choice = candle
  simulate_spikes = false
  points_per_dim = 10;
  tau_max = 25;
+ video_path = "video_database/"
 
  if choice == candle
     video_name = "64caf10.avi" # candle
@@ -23,7 +24,7 @@ choice = candle
  end
 
  # Read the video into the array
- video_array = get_video_array_from_file(video_name)
+ video_array = get_video_array_from_file(video_path*video_name)
  video_dimensions = get_video_dimension(video_array)
  indicies_set = get_video_mask(points_per_dim, video_dimensions)
  extracted_pixels = extract_pixels_from_video(video_array,
