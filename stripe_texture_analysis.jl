@@ -72,8 +72,7 @@ function doit(;do_clique_top = false,
          if save_figures
             path_to_save = ("/home/ed19aaf/Programming/Julia/JuliaLearning/results_vectorized_video/")
             name = split(video_name, ".")[1]
-            savefig(final_plot_ref, path_to_save*name*"vec_vid.png")
-
+            savefig(vector_plot_ref, path_to_save*name*"vec_vid.png")
          end
       end
 end
