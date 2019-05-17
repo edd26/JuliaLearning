@@ -5,7 +5,7 @@ using ComputationalHomology
     using Random
     using DelimitedFiles
 
-include("GeometricMatrix.jl")
+include("../MatrixToolbox.jl")
 
 N = 88
 dimensions = 5

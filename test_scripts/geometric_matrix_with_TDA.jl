@@ -5,7 +5,7 @@ using Distances
     using LightGraphs
     using GraphPlot
 
-include("GeometricMatrix.jl")
+include("../MatrixToolbox.jl")
 # using Graphs
 
 # using Eirene

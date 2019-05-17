@@ -3,7 +3,7 @@ using MATLAB
  using Match
  using DelimitedFiles
  using Plots
- include("../GeometricMatrix.jl")
+ include("../MatrixToolbox.jl")
  include("CliqueTop.jl")
 
 

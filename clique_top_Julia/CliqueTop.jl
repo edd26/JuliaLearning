@@ -5,7 +5,7 @@ using LinearAlgebra
 using Match
 using DelimitedFiles
 using Plots
-include("../GeometricMatrix.jl")
+include("../MatrixToolbox.jl")
 
 testing = false
 

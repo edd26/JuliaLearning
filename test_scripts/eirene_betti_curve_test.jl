@@ -7,7 +7,7 @@ using Distances
  using Plots
  using Eirene
  using DelimitedFiles
- include("GeometricMatrix.jl")
+ include("../MatrixToolbox.jl")
 
 save = false
 
