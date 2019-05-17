@@ -17,6 +17,8 @@ DelimitedFiles
 Random
 StatsBase
 Match
+Image
+Logging
 
 
 If the graphs are not displayed in the jupyter notebook,
