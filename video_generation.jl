@@ -34,6 +34,52 @@ if choice == VIDEO.diag_1
   end
  @info "Selected video: '$(video_name)'"
 
-rotate_and_save_video(video_path, video_name, "copy3_$(video_name)")
+rotate_and_save_video(video_path, video_name, "rot_$(video_name)")
+rotate_and_save_video(video_path, "diag_strip_30sec_single_dbl_gaps.mov", "rot_diag_strip_30sec_single_dbl_gaps.mov")
 
-# TODO Generate video of rotating checkboard
+
+
+
+##"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""Creation of new images"""""""""""""""""""""""""""
+
+using Luxor, Colors
+
+function frame(scene, framenumber)
+    distance = mod(framenumber,50)
+    if distance <= 25
+        for radius = distance:5:300
+            setdash("dot")
+            sethue("gray30")
+            A, B = [Point(x, 0) for x in [-radius, radius]]
+            circle(O, radius, :stroke)
+        end
+    else
+        for radius = (50-distance):5:300
+            setdash("dot")
+            sethue("gray30")
+            A, B = [Point(x, 0) for x in [-radius, radius]]
+            circle(O, radius, :stroke)
+        end
+    end
+
+    return
+end
+
+demo = Movie(400, 400, "test")
+
+function backdrop(scene, framenumber)
+    background("white")
+end
+
+
+path = "/home/ed19aaf/Programming/Julia/JuliaLearning/"
+gif_name = "sth.gif"
+animate(demo, [
+    Scene(demo, backdrop, 0:359),
+    Scene(demo, frame, 0:359, easingfunction=easeinoutcubic)
+    ], creategif=true, pathname=path*gif_name,  usenewffmpeg=false)
+
+
+using FileIO
+img = load(path*gif_name)
