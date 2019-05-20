@@ -1,6 +1,14 @@
 import Makie
  import VideoIO
  using StatsBase
+ using ImageFeatures
+  # using TestImages
+  using Images
+  using ImageDraw
+ using CoordinateTransformations
+ using Makie
+ using VideoIO
+ using Logging
 
 
  """
@@ -56,7 +64,8 @@ the points are chosen randomly in the ranges 1:horizontal size of frame,
 1:vertical size of frame. The returned values may be sorted in ascending order,
 if @sorted=true.
 """
-function get_video_mask(points_per_dim, video_dimensions; distribution="uniform", sorted=true)
+function get_video_mask(points_per_dim, video_dimensions;
+                                           distribution="uniform", sorted=true)
     video_height = video_dimensions[1]
     video_width = video_dimensions[2]
 
@@ -70,7 +79,8 @@ function get_video_mask(points_per_dim, video_dimensions; distribution="uniform"
         column_step = Int64(floor(video_width/columns))
 
         (video_height/row_step != points_per_dim) ? row_step+=1 : row_step
-        (video_width/column_step != points_per_dim) ? column_step+=1 : video_width
+        (video_width/column_step !=
+                                points_per_dim) ? column_step+=1 : video_width
 
         vertical_indicies = collect(1:row_step:video_height)
         horizontal_indicies = collect(1:column_step:video_width)
@@ -89,7 +99,8 @@ function get_video_mask(points_per_dim, video_dimensions; distribution="uniform"
             horizontal_indicies = sort(horizontal_indicies[1,:])
 
             vertical_indicies = reshape(vertical_indicies, (1,points_per_dim))
-            horizontal_indicies = reshape(horizontal_indicies, (1,points_per_dim))
+            horizontal_indicies =
+                              reshape(horizontal_indicies, (1,points_per_dim))
         end
         indicies_set = [vertical_indicies; horizontal_indicies]
     end
@@ -194,7 +205,8 @@ end
     get_average_from_tiles(extracted_pixels_matrix, N)
 
 Fnction takes a 3D array in which video is stored and splits every frame into
-non overlaping tiles of size NxN. If size of @extracted_pixels_matrix is not square of N, then only N^2 x N^2 matrix will be used for averaging.
+non overlaping tiles of size NxN. If size of @extracted_pixels_matrix is not
+square of N, then only N^2 x N^2 matrix will be used for averaging.
 """
 function get_average_from_tiles(extracted_pixels_matrix, N)
     # N = size(extracted_pixels,1)
@@ -208,11 +220,112 @@ function get_average_from_tiles(extracted_pixels_matrix, N)
         for col = 1:N:N^2
             for row = 1:N:N^2
                 result_matrix[mod(col,N), mod(row,N), frame] =
-                        dot(extracted_pixels_matrix[col:(col+N-1), row:(row+N-1), frame], mask_matrix) ./N^2
+                        dot(extracted_pixels_matrix[col:(col+N-1),
+                            row:(row+N-1), frame], mask_matrix) ./N^2
                 row_index += 1
             end
             col_index += 1
         end
     end
     return result_matrix
+end
+
+
+"""
+    rotate_around_center(img, angle = 5pi/6)
+
+Function rotates a single image (or a frame) around the center of the image by
+@angle radians.
+"""
+function rotate_around_center(img, angle = 5pi/6)
+  θ = angle
+  rot = recenter(RotMatrix(θ), [size(img)...] .÷ 2)  # a rotation around the center
+  x_translation = 0
+  y_translation = 0
+  tform = rot ∘ Translation(y_translation, x_translation)
+  img2 = warp(img, rot, axes(img))
+
+  return img2
+end
+
+
+"""
+    rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name;
+                                                                rotation=5pi/6)
+
+Fuction opens the @src_vid_name file, collects all the frames and then rotates
+the frame aroung the center and saves new video as @dest_vid_name at 
+@src_vid_path.
+
+Function was tested for following extensions;
+    .mov
+
+A solution for writing to a video file was taken from:
+https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/7
+
+"""
+function rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name, rotation=5pi/6)
+    @debug src_vid_path src_vid_name dest_vid_name
+    video_array = []
+
+    if isfile(src_vid_path*dest_vid_name)
+        @warn "File with destination file name already exists. Please give another name."
+        return
+    end
+
+    video_src_strm = VideoIO.open(src_vid_path*src_vid_name)
+    video_src = VideoIO.openvideo(video_src_strm,
+                                        target_format=VideoIO.AV_PIX_FMT_GRAY8)
+
+    while !eof(video_src)
+      img = read(video_src)
+      img = rotate_around_center(img, rotation)
+
+      push!(video_array,img)
+    end
+    close(video_src)
+    @debug "Video was rotated"
+
+    export_images_to_exist_vid(video_array, src_vid_path*dest_vid_name)
+    @info "The file was created:\n  $fname"
+end
+
+
+"""
+    export_images_to_exist_vid(video_array, dest_file)
+
+Exports set of images stored in @video_array to the dest_file.
+
+"""
+function export_images_to_vid(video_array, dest_file)
+    @debug "Exporting set of images to file"
+    fname = dest_file
+
+    video_dimensions = get_video_dimension(video_array)
+    h = video_dimensions.video_height
+    w = video_dimensions.video_width
+    nframes = video_dimensions.video_length
+    overwrite=true
+    fps=30
+    options = ``
+    ow = overwrite ? `-y` : `-n`
+
+    open(`ffmpeg
+            -loglevel warning
+            $ow
+            -f rawvideo
+            -pix_fmt rgb24
+            -s:v $(h)x$(w)
+            -r $fps
+            -i pipe:0
+            $options
+            -vf "transpose=0"
+            -pix_fmt yuv420p
+            $fname`, "w") do out
+        @debug isfile(fname)
+        for i = 1:nframes
+            write(out, convert.(RGB{N0f8}, clamp01.(video_array[i])))
+        end
+    end
+    @debug "Video was saved"
 end
