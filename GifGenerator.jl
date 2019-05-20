@@ -13,7 +13,7 @@ function generate_gif(frame_function, full_path, gif_dims)
         Scene(demo, backdrop, 0:len),
         Scene(demo, frame_function, 0:len, easingfunction=easeinoutcubic)
                     ], creategif=true, pathname=full_path,  usenewffmpeg=false)
-    @info "Generation finished"
+    @info "Generation finished."
 end
 
 
