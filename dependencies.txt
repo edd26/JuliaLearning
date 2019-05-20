@@ -19,6 +19,9 @@ StatsBase
 Match
 Image
 Logging
+ImageMagick
+FileIO
+Luxor
 
 
 If the graphs are not displayed in the jupyter notebook,
