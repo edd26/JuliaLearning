@@ -1,12 +1,12 @@
-import Makie
- import VideoIO
+# import Makie
+import VideoIO
  using StatsBase
  using ImageFeatures
   # using TestImages
-  using Images
-  using ImageDraw
+ using Images
+ using ImageDraw
  using CoordinateTransformations
- using Makie
+ # using Makie
  using VideoIO
  using Logging
 
@@ -343,4 +343,38 @@ function rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name, rotati
 
     export_images_to_exist_vid(video_array, src_vid_path*dest_vid_name)
     @info "The file was created:\n  $fname"
+end
+
+
+
+
+
+function get_local_total_correlations(video_array, centers, points_per_dim, shift)
+    half_size = ceil(Int,(points_per_dim-1)/2)
+    half_range = half_size + shift
+    h, w, len = get_video_dimension(video_array)
+    extracted_pixels = zeros(points_per_dim, points_per_dim, len)
+
+    for frame = 1:len
+        img = video_array[frame]
+        for index_x = 1:size(centers,2)
+            c_x = centers[2, index_x]
+            for index_y = 1:size(centers,2)
+                c_y = centers[1, index_y]
+                subimage = img[(c_x-half_range):(c_x+half_range),
+                                (c_y-half_range):(c_y+half_range)]
+                center = img[(c_x-half_size):(c_x+half_size), (c_y-half_size):(c_y+half_size)]
+
+                for left_boundary = 1:(2*shift+1)
+                    for lower_boundary = 1:(2*shift+1)
+                        corelation = center .* subimage[left_boundary:left_boundary+points_per_dim-1, lower_boundary:lower_boundary+points_per_dim-1]
+                        corelation = sum(corelation)
+                        extracted_pixels[index_x, index_y, frame] += corelation
+                    end
+                end
+                extracted_pixels[index_x, index_y, frame] /= 256*(points_per_dim^2)*(shift*2)^2
+            end
+        end
+    end
+    return extracted_pixels
 end
