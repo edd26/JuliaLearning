@@ -232,12 +232,12 @@ end
 
 
 """
-    rotate_around_center(img, angle = 5pi/6)
+    rotate_img_around_center(img, angle = 5pi/6)
 
 Function rotates a single image (or a frame) around the center of the image by
 @angle radians.
 """
-function rotate_around_center(img, angle = 5pi/6)
+function rotate_img_around_center(img, angle = 5pi/6)
   θ = angle
   rot = recenter(RotMatrix(θ), [size(img)...] .÷ 2)  # a rotation around the center
   x_translation = 0
@@ -249,45 +249,28 @@ function rotate_around_center(img, angle = 5pi/6)
 end
 
 
-"""
-    rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name;
-                                                                rotation=5pi/6)
-
-Fuction opens the @src_vid_name file, collects all the frames and then rotates
-the frame aroung the center and saves new video as @dest_vid_name at 
-@src_vid_path.
-
-Function was tested for following extensions;
-    .mov
-
-A solution for writing to a video file was taken from:
-https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/7
 
 """
-function rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name, rotation=5pi/6)
-    @debug src_vid_path src_vid_name dest_vid_name
+    rotate_vid_around_center(img, rotation = 5pi/6)
+
+Function rotates a video around the center of the image by @rotation radians and
+ the outout into matrix.
+"""
+function rotate_vid_around_center(src_vid_path,src_vid_name; rotation = 5pi/6)
     video_array = []
-
-    if isfile(src_vid_path*dest_vid_name)
-        @warn "File with destination file name already exists. Please give another name."
-        return
-    end
-
     video_src_strm = VideoIO.open(src_vid_path*src_vid_name)
     video_src = VideoIO.openvideo(video_src_strm,
                                         target_format=VideoIO.AV_PIX_FMT_GRAY8)
 
     while !eof(video_src)
       img = read(video_src)
-      img = rotate_around_center(img, rotation)
+      img = rotate_img_around_center(img, rotation)
 
       push!(video_array,img)
     end
     close(video_src)
-    @debug "Video was rotated"
 
-    export_images_to_exist_vid(video_array, src_vid_path*dest_vid_name)
-    @info "The file was created:\n  $fname"
+  return video_array
 end
 
 
@@ -322,10 +305,42 @@ function export_images_to_vid(video_array, dest_file)
             -vf "transpose=0"
             -pix_fmt yuv420p
             $fname`, "w") do out
-        @debug isfile(fname)
         for i = 1:nframes
             write(out, convert.(RGB{N0f8}, clamp01.(video_array[i])))
         end
     end
     @debug "Video was saved"
+end
+
+
+"""
+    rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name;
+                                                                rotation=5pi/6)
+
+Fuction opens the @src_vid_name file, collects all the frames and then rotates
+the frame aroung the center and saves new video as @dest_vid_name at
+@src_vid_path.
+
+Function was tested for following extensions;
+    .mov
+
+A solution for writing to a video file was taken from:
+https://discourse.julialang.org/t/creating-a-video-from-a-stack-of-images/646/7
+"""
+function rotate_and_save_video(src_vid_path, src_vid_name, dest_vid_name, rotation=5pi/6)
+    @debug src_vid_path src_vid_name dest_vid_name
+
+    if !isfile(src_vid_path*src_vid_name)
+        @warn "Source file at given path does not exist. Please give another name."
+        return
+    elseif isfile(src_vid_path*dest_vid_name)
+        @warn "File with destination video name at src_video_path already exists. Please give another name."
+        return
+    end
+
+    video_array = rotate_vid_around_ceter(src_vid_path, src_vid_name)
+    @debug "Video was rotated"
+
+    export_images_to_exist_vid(video_array, src_vid_path*dest_vid_name)
+    @info "The file was created:\n  $fname"
 end
