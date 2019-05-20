@@ -5,6 +5,7 @@ using Plots
  include("VideoManage.jl")
  include("MatrixToolbox.jl")
  include("clique_top_Julia/CliqueTop.jl")
+ using FFTW
  VIDEO = (diag_1=1,
              diag_2=2,
              diag_g1=3,
@@ -66,6 +67,10 @@ function doit(;do_clique_top = true,
 
       video_array = get_video_array_from_file(video_path*video_name)
       video_dimensions = get_video_dimension(video_array)
+
+      fft_array = fft(video_array[1][1:500,1:500])
+      Plots.heatmap(map(log10, map(abs, real(fft_array))), color=:grays)
+      # Plots.heatmap(map(log10, map(abs, imag(fft_array))), color=:grays)
 
 
  shift = 2
