@@ -1,9 +1,10 @@
 include("Settings.jl")
 
-ENV["JULIA_DEBUG"] = "all"
-
-function start_menu()
+function start_menu(;debug=false)
     # TODO check for dependencies and then inlude the settings
+    if debug
+        ENV["JULIA_DEBUG"] = "all"
+    end
 
     println("------------------------------")
     println("Welcome to the main menu.")
@@ -187,6 +188,7 @@ end
         println()
     end
 
+# TODO remove this function as the test are done on set instead of this value
     function change_vid_from_list()
         @debug "Launching change_vid_from_list."
         println("Please select single number of the listed videos: ")
@@ -211,6 +213,7 @@ end
         @debug "New file name: " testing_paramenters["video_name"]
     end
 
+# TODO same as above
     function change_vid_name()
         change = true
         ask_for_answer = true
@@ -344,11 +347,9 @@ end
         end #for keys
     end #function
 
-    function set_videos_set()
-        @debug "Launching set_videos_set."
-        list_videos()
-        println("Please select numbers of the listed videos.")
-        println("Note: they should be separetaed with single space.")
+    function set_set(set_to_change)
+        @debug "Launching set_set for: " set_to_change
+
         action = get_input_from_usr()
         @debug "Menu action from usr: " action
 
@@ -361,17 +362,37 @@ end
             for k = 1:elements_in_set
                 int_set[k] = parse(Int, set[k])
             end
-            videos_set = int_set
-            println("New testing set is set to: $(videos_set).")
+            set_to_change = int_set
+            println("New testing set is set to: $(set_to_change).")
         catch err
             if isa(err, ArgumentError)
                 println("Given input was not a Integer.")
             else
                 println("An error has occurred while giving the input")
             end
-
         end
+    end
 
+    function set_videos_set()
+        @debug "Launching set_videos_set."
+        list_videos()
+        println("Please select numbers of the listed videos.")
+        println("Note: they should be separetaed with single space.")
+        set_set(videos_set)
+    end
+
+    function set_tau_set()
+        @debug "Launching set_tau_set."
+        println("Please type tau values for which testing should be done.")
+        println("Note: values should be separetaed with single space.")
+        set_set(tau_max_set)
+    end
+
+    function set_points_per_dim_set_set()
+        @debug "Launching set_points_per_dim_set_set."
+        println("Please type points_per_dim_set values for which testing should be done.")
+        println("Note: values should be separetaed with single space.")
+        set_set(points_per_dim_set)
     end
 
     function launch_full_testing()
@@ -379,7 +400,7 @@ end
     end
 
     function launch_quick_testing()
-        println("Not yet implemented :(")
+        testing_function()
     end
 
 
@@ -409,12 +430,16 @@ video_menu_items  = ["Display currennt video path.",
 testing_menu_actions = [disp_testing_options,
                 change_testing_params,
                 set_videos_set,
+                set_tau_set,
+                set_points_per_dim_set_set,
                 launch_full_testing,
                 launch_quick_testing,
                 proceed]
 testing_menu_items  = ["Display testing routine and parameters.",
             "Change the testing parameters.",
             "Set testing set.",
+            "Set maxial tau values set.",
+            "Set the number of points whcih will be extracted from the main matrix.",
             "Launch full testing (will ask and explain all parameters).",
             "Launch quick testing (uses set of currently set parameters).",
             "Go to previous menu."]
@@ -425,16 +450,15 @@ menus_dict["video"] = ("Video Menu", video_menu_items, video_menu_actions)
 menus_dict["testing"] = ("Testing Menu", testing_menu_items, testing_menu_actions)
 
 function testing_function()
-    do_clique_top,
-        do_eirene,
-        save_figures,
-        plot_betti_figrues,
-        plot_vectorized_video,
-        tau_max,
-        points_per_dim,
-        size_limiter,
-        use_videos_set,
-        video_name = values(testing_paramenters)
+    do_clique_top = testing_paramenters["do_clique_top"]
+    do_eirene =     testing_paramenters["do_eirene"]
+    save_figures = testing_paramenters["save_figures"]
+    plot_betti_figrues = testing_paramenters["plot_betti_figrues"]
+    plot_vectorized_video = testing_paramenters["plot_vectorized_video"]
+    size_limiter = testing_paramenters["size_limiter"]
+
+
+    @debug "do_clique_top: " do_clique_top
 
     function saving_figures(ref, path, video_name)
         name = split(video_name, ".")[1]
@@ -445,21 +469,28 @@ function testing_function()
         @info "File saved: " name
     end
 
+    @debug "All videos are: " videos_names
+    @debug "Video set is : " videos_set
     for video in videos_set
         choice = videos_names[video]
-        @info "Selected video: " video_name
+        @info "Selected video: " choice
 
-        video_array = get_video_array_from_file(video_path*video_name)
+        @debug "Path and choice is:" video_path*choice
+        video_array = get_video_array_from_file(video_path*choice)
+        @info "Array extracted."
+
         video_dimensions = get_video_dimension(video_array)
         for points_per_dim in points_per_dim_set #TODO add end for this loop
             indicies_set = get_video_mask(points_per_dim, video_dimensions)
+            @info "Mask extracted."
 
             extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
+            @info "Pixels extracted."
 
             vectorized_video = vectorize_video(extracted_pixels_matrix)
             @info "Video is vectorized, proceeding to Pairwise correlation."
 
-            for tau in tau_set
+            for tau in tau_max_set
                 ## Compute pairwise correlation
                 C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
 
@@ -479,10 +510,14 @@ function testing_function()
                     size_limiter = size(C_ij,1)
                 end
 
+                @debug "do_clique_top: " do_clique_top
+                @debug "testing_paramenters['do_clique_top']: " testing_paramenters["do_clique_top"]
                 if do_clique_top
+                    @debug pwd()
                     @time c_ij_betti_num, edge_density, persistence_intervals, unbounded_intervals = compute_clique_topology(C_ij[1:size_limiter, 1:size_limiter], edgeDensity = 0.6)
                 end
 
+                @debug "do_eirene: " do_eirene
                 if do_eirene
                     C = eirene(C_ij[1:size_limiter, 1:size_limiter],maxdim=3,model="vr")
                 end
@@ -538,3 +573,12 @@ function testing_function()
         end #for points_per_dim
     end #for video set
 end #func
+
+# TODO test functionality
+# TODO test saving files
+# TODO add different types of choosing values from matrix {uniform, random, patch}
+# TODO Add listing of the sets
+# TODO Remove setting the file name
+# TODO Do testing function testing as it crashes
+
+start_menu(debug=true)
