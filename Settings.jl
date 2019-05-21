@@ -1,4 +1,5 @@
 using Plots
+using Dates
 
 # include("VideoManage.jl")
 # include("MatrixToolbox.jl")
@@ -26,8 +27,25 @@ video_choice = VIDEO.diag_1
 
 
 video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
-results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results_patch_average/"
-results_eirene = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/results_eirene/"
+results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/"
+
+session_number = Dates.value(Dates.now() - Dates.DateTime(Dates.today()))
+session_name =  string(Dates.today()) * "-"*string(session_number)
+
+current_path = pwd()
+cd(results_path)
+if !isdir(session_name)
+    mkdir(results_path*session_name)
+    # mkdir(results_path*session_name*"/clique_top")
+    # mkdir(results_path*session_name*"/eirene")
+    # mkdir(results_path*session_name*"/vectorized")
+end
+
+results_cliq = results_path*session_name*"/" # pwd()*"/clique_top"
+results_eirene = results_path*session_name*"/" # pwd()*"/eirene"
+results_vec = results_path*session_name*"/" # pwd()*"/vectorized"
+
+cd(current_path)
 
 videos_names = readdir(video_path)
 
