@@ -1,9 +1,9 @@
 using Plots
 using Dates
 
-# include("VideoManage.jl")
-# include("MatrixToolbox.jl")
-# include("clique_top_Julia/CliqueTop.jl")
+include("VideoManage.jl")
+include("MatrixToolbox.jl")
+include("clique_top_Julia/CliqueTop.jl")
 
 VIDEO = (diag_1=1,
             diag_2=2,
@@ -58,10 +58,18 @@ testing_paramenters["plot_betti_figrues"] = true
 testing_paramenters["plot_vectorized_video"] = true
 testing_paramenters["tau_max"] = 25
 testing_paramenters["points_per_dim"] = 9
-testing_paramenters["size_limiter"] = 40
+testing_paramenters["size_limiter"] = 20
 testing_paramenters["use_testing_set"] = true
 testing_paramenters["video_name"] = videos_names[video_choice]
 
-videos_set = [video_choice]
-tau_max_set = [testing_paramenters["tau_max"]]
-points_per_dim_set = [testing_paramenters["points_per_dim"]]
+# videos_set = [video_choice]
+# tau_max_set = [testing_paramenters["tau_max"]]
+# points_per_dim_set = [testing_paramenters["points_per_dim"]]
+
+videos_set = [8 10]
+tau_max_set = [5 10 20 25]
+points_per_dim_set = [4 9 12]
+
+# for video in videos_set
+#     println(video)
+# end
