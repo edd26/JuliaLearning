@@ -1,9 +1,9 @@
 using Plots
  # using MATLAB
- using Eirene
- include("VideoManage.jl")
- include("MatrixToolbox.jl")
- include("clique_top_Julia/CliqueTop.jl")
+ # using Eirene
+ include("setting.jl")
+ # include("MatrixToolbox.jl")
+ # include("clique_top_Julia/CliqueTop.jl")
  VIDEO = (diag_1=1,
              diag_2=2,
              diag_g1=3,
@@ -24,18 +24,18 @@ function doit(;do_clique_top = true,
 
    #debug code, should not be reached when function is launched
  if false
-    do_clique_top = false
-    do_eirene = true
+    do_clique_top = true
+    do_eirene = false
     choice = VIDEO.diag_gb
-    save_figures = true
+    save_figures = false
     plot_betti_figrues = true
     plot_vectorized_video = false
     tau_max = 5
     points_per_dim = 9
  end
 
-   video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
-   results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results_patch_average/"
+   # video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
+   # results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results_patch_average/"
    results_eirene = results_path
    results_vetorized = results_path
 
