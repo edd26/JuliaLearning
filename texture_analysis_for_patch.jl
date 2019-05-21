@@ -1,9 +1,8 @@
-using Plots
+
  # using MATLAB
  # using Eirene
  include("setting.jl")
- # include("MatrixToolbox.jl")
- # include("clique_top_Julia/CliqueTop.jl")
+
  VIDEO = (diag_1=1,
              diag_2=2,
              diag_g1=3,
@@ -34,8 +33,6 @@ function doit(;do_clique_top = true,
     points_per_dim = 9
  end
 
-   # video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
-   # results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results_patch_average/"
    results_eirene = results_path
    results_vetorized = results_path
 

@@ -2,17 +2,9 @@ using Plots
  # using MATLAB
  # using Eirene
  # using GraphPlot
- include("VideoManage.jl")
- include("MatrixToolbox.jl")
- include("clique_top_Julia/CliqueTop.jl")
+ include("setting.jl")
  using FFTW
- VIDEO = (diag_1=1,
-             diag_2=2,
-             diag_g1=3,
-             diag_g2=4,
-             diag_gb=5,
-             diag_dbl=6,
-             horiz=7)
+
 
 function doit(;do_clique_top = true,
                do_eirene = false,
@@ -38,8 +30,6 @@ function doit(;do_clique_top = true,
  end
 
  indices = points_per_dim+2
-   video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
-   results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/results_patch_average/"
    results_eirene = results_path
    results_vetorized = results_path
 
