@@ -15,7 +15,6 @@ VIDEO = (diag_1=1,
 
 video_choice = VIDEO.diag_1
 
-# TODO Automate videos listing in this file by sth linke ls *.mov
 # videos_names = ["diag_strip_30sec_1.mov",
 #                 "diag_strip_30sec_2.mov",
 #                 "diag_strip_30sec_gray_1.mov",
@@ -63,5 +62,6 @@ testing_paramenters["size_limiter"] = 40
 testing_paramenters["use_testing_set"] = true
 testing_paramenters["video_name"] = videos_names[video_choice]
 
-testing_set = [video_choice]
-#TODO set of videos to test
+videos_set = [video_choice]
+tau_max_set = [testing_paramenters["tau_max"]]
+points_per_dim_set = [testing_paramenters["points_per_dim"]]
