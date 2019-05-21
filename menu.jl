@@ -423,3 +423,117 @@ menus_dict = Dict()
 menus_dict["main"] = ("Main Menu", main_menu_items, main_menu_action)
 menus_dict["video"] = ("Video Menu", video_menu_items, video_menu_actions)
 menus_dict["testing"] = ("Testing Menu", testing_menu_items, testing_menu_actions)
+
+function testing_function()
+    do_clique_top,
+        do_eirene,
+        save_figures,
+        plot_betti_figrues,
+        plot_vectorized_video,
+        tau_max,
+        points_per_dim,
+        size_limiter,
+        use_testing_set,
+        video_name = values(testing_paramenters)
+
+    for video in testing_set
+        choice = videos_names[video]
+        @info "Selected video: " video_name
+
+        video_array = get_video_array_from_file(video_path*video_name)
+        video_dimensions = get_video_dimension(video_array)
+
+        indicies_set = get_video_mask(points_per_dim, video_dimensions)
+
+        extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
+
+        vectorized_video = vectorize_video(extracted_pixels_matrix)
+        println("Video is vectorized, proceeding to Pairwise correlation.")
+
+        # ----------------------------------------------------------------
+        ## Compute pairwise correlation
+        C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
+
+        # set the diagonal to zero
+        for diag_elem in 1:size(C_ij,1)
+            C_ij[diag_elem,diag_elem] = 0
+        end
+        println("Pairwise correlation finished, proceeding to persistance homology.")
+
+        # Compute persistance homology with CliqueTopJulia
+        size_limiter = testing_paramenters["size_limiter"]
+        @debug "using size limiter = " size_limiter
+
+        if size_limiter > size(C_ij,1)
+            @warn "Used size limiter is larger than matrix dimension: " size_limiter size(C_ij,1)
+            @warn "Using maximal size instead"
+            size_limiter = size(C_ij,1)
+        end
+
+        ## Copute persistance homology with the Julia version of clique-top library
+        if do_clique_top
+            @time c_ij_betti_num, edge_density, persistence_intervals, unbounded_intervals = compute_clique_topology(C_ij[1:size_limiter, 1:size_limiter], edgeDensity = 0.6)
+        end
+
+        if do_eirene
+            C = eirene(C_ij[1:size_limiter, 1:size_limiter],maxdim=3,model="vr")
+        end
+
+        # --------------------------------------------------------------------
+        # Plot results
+        if plot_vectorized_video
+            vector_plot_ref = heatmap(vectorized_video, color=:grays)
+            if save_figures
+                name = split(video_name, ".")[1]
+                savefig(vector_plot_ref, results_vec*"vec_$(choice).png")
+            end
+        end
+
+        if plot_betti_figrues && do_clique_top
+            betti_numbers = c_ij_betti_num
+            title = "Betti curves for pairwise corr. matrix"
+            p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
+
+            heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(video_name), number of points: $points_per_dim");
+
+            betti_plot_clq_ref = plot(p1, heat_map1, layout = (2,1))
+
+            if save_figures
+                name = split(video_name, ".")[1]
+                name =  results_cliq * name *
+                                        "_size$(size_limiter)_tau$(tau_max).png"
+                savefig(betti_plot_clq_ref, name)
+
+                @info "File saved: " name
+            end
+
+        end
+        if plot_betti_figrues && do_eirene
+            betti_0 = betticurve(C, dim=0)
+            betti_1 = betticurve(C, dim=1)
+            betti_2 = betticurve(C, dim=2)
+            betti_3 = betticurve(C, dim=3)
+
+            title = "Betti curves for pairwise corr. matrix"
+
+            p1 = plot(betti_0[:,1], betti_0[:,1], label="beta_0", title=title)
+            #, ylims = (0,maxy)
+            plot!(betti_1[:,1], betti_1[:,2], label="beta_1")
+            plot!(betti_2[:,1], betti_2[:,2], label="beta_2")
+            plot!(betti_3[:,1], betti_3[:,2], label="beta_3")
+
+            heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(video_name), number of points: $points_per_dim");
+
+            betti_plot_ei_ref = plot(p1, heat_map1, layout = (2,1))
+
+            if save_figures
+                name = split(video_name, ".")[1]
+                name =  results_eirene * name *
+                                        "_size$(size_limiter)_tau$(tau_max).png"
+                savefig(betti_plot_ei_ref, name)
+
+                @info "File saved: " name
+            end
+        end
+    end
+end
