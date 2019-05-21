@@ -1,8 +1,8 @@
 using Plots
 
-include("VideoManage.jl")
-include("MatrixToolbox.jl")
-include("clique_top_Julia/CliqueTop.jl")
+# include("VideoManage.jl")
+# include("MatrixToolbox.jl")
+# include("clique_top_Julia/CliqueTop.jl")
 
 VIDEO = (diag_1=1,
             diag_2=2,
@@ -15,15 +15,35 @@ VIDEO = (diag_1=1,
 video_choice = VIDEO.diag_1
 
 # TODO Automate videos listing in this file by sth linke ls *.mov
-videos_names = ["diag_strip_30sec_1.mov",
-                "diag_strip_30sec_2.mov",
-                "diag_strip_30sec_gray_1.mov",
-                "diag_strip_30sec_gray_2.mov",
-                "diag_strip_30sec_gray_both.mov",
-                "diag_strip_30sec_single_dbl_gaps.mov",
-                "horiz_strip_30sec.mov"]
+# videos_names = ["diag_strip_30sec_1.mov",
+#                 "diag_strip_30sec_2.mov",
+#                 "diag_strip_30sec_gray_1.mov",
+#                 "diag_strip_30sec_gray_2.mov",
+#                 "diag_strip_30sec_gray_both.mov",
+#                 "diag_strip_30sec_single_dbl_gaps.mov",
+#                 "horiz_strip_30sec.mov"]
 
-video_name = videos_names[video_choice]
+
 
 video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
 results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results_patch_average/"
+results_eirene = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/results_eirene/"
+
+videos_names = readdir(video_path)
+
+# ---------------
+testing_paramenters = Dict()
+testing_paramenters["do_clique_top"] = true
+testing_paramenters["do_eirene"] = false
+# testing_paramenters["choice"] = VIDEO.diag_gb
+testing_paramenters["save_figures"] = false
+testing_paramenters["plot_betti_figrues"] = true
+testing_paramenters["plot_vectorized_video"] = true
+testing_paramenters["tau_max"] = 25
+testing_paramenters["points_per_dim"] = 9
+testing_paramenters["size_limiter"] = 40
+testing_paramenters["use_testing_set"] = true
+testing_paramenters["video_name"] = videos_names[video_choice]
+
+testing_set = [video_choice]
+#TODO set of videos to test
