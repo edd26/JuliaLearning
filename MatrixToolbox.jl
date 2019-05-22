@@ -105,7 +105,9 @@ end
 function plot_betti_numbers(betti_numbers, edge_density, title="Geometric  matrix"; stop=0.6)
     p1 = plot(edge_density, betti_numbers[:,1], label="beta_0", title=title, legend=:topleft) #, ylims = (0,maxy)
     plot!(edge_density, betti_numbers[:,2], label="beta_1")
-    plot!(edge_density, betti_numbers[:,3], label="beta_2")
+    if size(betti_numbers,2)>2
+        plot!(edge_density, betti_numbers[:,3], label="beta_2")
+    end
 
     return p1
 end
