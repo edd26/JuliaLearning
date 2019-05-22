@@ -1,9 +1,8 @@
 using Plots
 using Dates
 
-include("VideoProcessing.jl")
-include("MatrixToolbox.jl")
-include("clique_top_Julia/CliqueTop.jl")
+include("TestingPairwiseCorrelationmatrix.jl.jl")
+
 
 VIDEO = (diag_1=1,
             diag_2=2,
@@ -15,7 +14,8 @@ VIDEO = (diag_1=1,
 
 DISTRIBUTION = (uniform="uniform",
                 random="random",
-                patch="patch")
+                patch="patch",
+                local_corr="local_corr")
 
 video_choice = VIDEO.diag_1
 
@@ -34,9 +34,9 @@ if !isdir(session_name)
     # mkdir(results_path*session_name*"/vectorized")
 end
 
-results_cliq = results_path*session_name*"/" # pwd()*"/clique_top"
-results_eirene = results_path*session_name*"/" # pwd()*"/eirene"
-results_vec = results_path*session_name*"/" # pwd()*"/vectorized"
+results_cliq_path = results_path*session_name*"/" # pwd()*"/clique_top"
+results_eirene_path = results_path*session_name*"/" # pwd()*"/eirene"
+results_vec_path = results_path*session_name*"/" # pwd()*"/vectorized"
 
 cd(current_path)
 
@@ -56,8 +56,9 @@ test_params["size_limiter"] = 20
 test_params["use_testing_set"] = true
 test_params["video_name"] = videos_names[video_choice]
 test_params["ind_distrib"] = DISTRIBUTION.uniform
+test_params["shift_set"] = [2 4]
 
-#TODO saving and loading from file
+#TODO saving and loading from multiple files
 
 # videos_set = [video_choice]
 # tau_max_set = [test_params["tau_max"]]
@@ -66,4 +67,5 @@ test_params["ind_distrib"] = DISTRIBUTION.uniform
 videos_set = [8 10]
 tau_max_set = [5 10 20 25]
 points_per_dim_set = [4 9 12]
+shifts_set = [2 4]
 patch_params = Dict("x"=>1, "y"=>1, "spread" =>1)
