@@ -1,7 +1,7 @@
 using Plots
 using Dates
 
-include("VideoManage.jl")
+include("VideoProcessing.jl")
 include("MatrixToolbox.jl")
 include("clique_top_Julia/CliqueTop.jl")
 

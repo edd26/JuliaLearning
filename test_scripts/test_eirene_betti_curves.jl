@@ -1,7 +1,7 @@
 using Plots
  using MATLAB
  using Eirene
- include("VideoManage.jl")
+ include("VideoProcessing.jl")
  include("MatrixToolbox.jl")
  include("clique_top_Julia/CliqueTop.jl")
  VIDEO = (diag_1=1,

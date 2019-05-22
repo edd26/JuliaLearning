@@ -1,4 +1,4 @@
-include("VideoManage.jl")
+include("VideoProcessing.jl")
 
  ENV["JULIA_DEBUG"] = "all"
 
