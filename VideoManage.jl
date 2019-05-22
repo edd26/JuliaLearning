@@ -7,7 +7,6 @@ import VideoIO
  using ImageDraw
  using CoordinateTransformations
  # using Makie
- using VideoIO
  using Logging
 
 
