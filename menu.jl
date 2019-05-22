@@ -187,7 +187,7 @@ end
 
     function disp_loaded_file_name()
         println("Loaded file name is:")
-        println(testing_paramenters["video_name"])
+        println(test_params["video_name"])
         println()
     end
 
@@ -203,9 +203,9 @@ end
             @debug "new_name: " new_name
             @debug "isfile: " isfile(video_path*new_name)
             if isfile(video_path*new_name)
-                delete!(testing_paramenters, "video_name")
-                testing_paramenters["video_name"] = new_name
-                @debug "The name was changed to: " testing_paramenters["video_name"]
+                delete!(test_params, "video_name")
+                test_params["video_name"] = new_name
+                @debug "The name was changed to: " test_params["video_name"]
                 println("New file name was succesfully changed.")
             else
                 println("Error occurred. File from the list can not be found at vieo path!")
@@ -213,7 +213,7 @@ end
         else
             @debug action
         end
-        @debug "New file name: " testing_paramenters["video_name"]
+        @debug "New file name: " test_params["video_name"]
     end
 
 # TODO same as above
@@ -226,7 +226,7 @@ end
             new_video = get_input_from_usr()
 
             if isfile(video_path*new_video)
-                testing_paramenters["video_name"] = new_video
+                test_params["video_name"] = new_video
                 println("New video was set succesfully.")
                 ask_for_answer = false
                 return
@@ -276,15 +276,15 @@ end
 
     function disp_testing_options()
         println("""
-        Use clique-top library:                 $(testing_paramenters["do_clique_top"])
-        Use Eirene library:                     $(testing_paramenters["do_eirene"])
-        Selected video:                         $(testing_paramenters["video_name"])
-        Plot Betti curves:                      $(testing_paramenters["plot_betti_figrues"])
-        Plot vectorized video:                  $(testing_paramenters["do_clique_top"])
-        Save figures:                           $(testing_paramenters["save_figures"])
-        τ_max:                                  $(testing_paramenters["tau_max"])
-        Number of points in mask:               $(testing_paramenters["points_per_dim"])
-        Maximal size of pairwise corr. matrix:  $(testing_paramenters["size_limiter"])
+        Use clique-top library:                 $(test_params["do_clique_top"])
+        Use Eirene library:                     $(test_params["do_eirene"])
+        Selected video:                         $(test_params["video_name"])
+        Plot Betti curves:                      $(test_params["plot_betti_figrues"])
+        Plot vectorized video:                  $(test_params["do_clique_top"])
+        Save figures:                           $(test_params["save_figures"])
+        τ_max:                                  $(test_params["tau_max"])
+        Number of points in mask:               $(test_params["points_per_dim"])
+        Maximal size of pairwise corr. matrix:  $(test_params["size_limiter"])
         """)
         println("End of options")
     end
@@ -294,7 +294,7 @@ end
         ask_for_new_val = true
 
         k = 1
-        for key in keys(testing_paramenters)
+        for key in keys(test_params)
             if key != "video_name"
                 println("$(k). $(key)")
                 k += 1
@@ -304,9 +304,9 @@ end
         choice = get_menu_item_from_usr(k)
 
         kk = 1
-        for key in keys(testing_paramenters)
+        for key in keys(test_params)
             if kk == choice
-                choice_val = testing_paramenters[key]
+                choice_val = test_params[key]
                 type = typeof(choice_val)
 
                 while ask_for_new_val
@@ -331,10 +331,10 @@ end
 
                         if asserted
                             @debug "New value of the parameters will be: " new_value
-                            delete!(testing_paramenters, key)
-                            testing_paramenters[key] = new_value
+                            delete!(test_params, key)
+                            test_params[key] = new_value
                             println("Succesfully changed the parameter to:")
-                            println(testing_paramenters[key])
+                            println(test_params[key])
                             return
                         end
                     catch err
@@ -403,7 +403,7 @@ end
     end
 
     function launch_quick_testing()
-        testing_function()
+        testing_pariwise_corr()
     end
 
 
@@ -452,134 +452,9 @@ menus_dict["main"] = ("Main Menu", main_menu_items, main_menu_action)
 menus_dict["video"] = ("Video Menu", video_menu_items, video_menu_actions)
 menus_dict["testing"] = ("Testing Menu", testing_menu_items, testing_menu_actions)
 
-function testing_function()
-    do_clique_top = testing_paramenters["do_clique_top"]
-    do_eirene =     testing_paramenters["do_eirene"]
-    save_figures = testing_paramenters["save_figures"]
-    plot_betti_figrues = testing_paramenters["plot_betti_figrues"]
-    plot_vectorized_video = testing_paramenters["plot_vectorized_video"]
-    size_limiter = testing_paramenters["size_limiter"]
-
-
-    @debug "do_clique_top: " do_clique_top
-
-    function saving_figures(ref, path, choice, points_per_dim, tau)
-        name = split(choice, ".")[1]
-        name =  path * name *
-                "_size$(size_limiter)_points$(points_per_dim)_tau$(tau).png"
-        savefig(ref, name)
-
-        @info "File saved: " name
-    end
-
-    @debug "All videos are: " videos_names
-    @debug "Video set is : " videos_set
-    for video in videos_set
-        choice = videos_names[video]
-        @info "Selected video: " choice
-
-        @debug "Path and choice is:" video_path*choice
-        video_array = get_video_array_from_file(video_path*choice)
-        @info "Array extracted."
-
-        video_dimensions = get_video_dimension(video_array)
-        for points_per_dim in points_per_dim_set
-            indicies_set = get_video_mask(points_per_dim, video_dimensions)
-            @info "Mask extracted."
-
-            extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
-            @info "Pixels extracted."
-
-            vectorized_video = vectorize_video(extracted_pixels_matrix)
-            @info "Video is vectorized, proceeding to Pairwise correlation."
-
-            for tau in tau_max_set
-                ## Compute pairwise correlation
-                C_ij = get_pairwise_correlation_matrix(vectorized_video, tau)
-
-                # set the diagonal to zero
-                for diag_elem in 1:size(C_ij,1)
-                    C_ij[diag_elem,diag_elem] = 0
-                end
-                @info "Pairwise correlation finished, proceeding to persistance homology."
-
-                # Compute persistance homology with CliqueTopJulia
-                size_limiter = testing_paramenters["size_limiter"]
-                @debug "using size limiter = " size_limiter
-
-                if size_limiter > size(C_ij,1)
-                    @warn "Used size limiter is larger than matrix dimension: " size_limiter size(C_ij,1)
-                    @warn "Using maximal size instead"
-                    size_limiter = size(C_ij,1)
-                end
-
-                @debug "do_clique_top: " do_clique_top
-                @debug "testing_paramenters['do_clique_top']: " testing_paramenters["do_clique_top"]
-                if do_clique_top
-                    @debug pwd()
-                    @time c_ij_betti_num, edge_density, persistence_intervals, unbounded_intervals = compute_clique_topology(C_ij[1:size_limiter, 1:size_limiter], edgeDensity = 0.6)
-                end
-
-                @debug "do_eirene: " do_eirene
-                if do_eirene
-                    C = eirene(C_ij[1:size_limiter, 1:size_limiter],maxdim=3,model="vr")
-                end
-
-                # --------------------------------------------------------------------
-                # Plot results
-                @debug "Proceeding to plotting."
-                if plot_vectorized_video
-                    vector_plot_ref = heatmap(vectorized_video, color=:grays)
-                    if save_figures
-                        name = split(choice, ".")[1]
-                        name = "vec_" * name * "_sz$(size_limiter)_p$(points_per_dim)_tau$(tau).png"
-                        savefig(vector_plot_ref, name)
-                    end #save vec
-                end #plot vec
-
-                if plot_betti_figrues && do_clique_top
-                    betti_numbers = c_ij_betti_num
-                    title = "Betti curves for pairwise corr. matrix"
-                    p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
-
-                    heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Pariwise Correlation matrix, number of points: $(points_per_dim)");
-
-                    betti_plot_clq_ref = plot(p1, heat_map1, layout = (2,1))
-
-                    if save_figures
-                        saving_figures(betti_plot_clq_ref, results_cliq, choice, points_per_dim, tau)
-                    end#save fig
-                end #plot cliq
-
-                if plot_betti_figrues && do_eirene
-                    betti_0 = betticurve(C, dim=0)
-                    betti_1 = betticurve(C, dim=1)
-                    betti_2 = betticurve(C, dim=2)
-                    betti_3 = betticurve(C, dim=3)
-
-                    title = "Betti curves for pairwise corr. matrix"
-
-                    p1 = plot(betti_0[:,1], betti_0[:,1], label="beta_0", title=title)
-                    #, ylims = (0,maxy)
-                    plot!(betti_1[:,1], betti_1[:,2], label="beta_1")
-                    plot!(betti_2[:,1], betti_2[:,2], label="beta_2")
-                    plot!(betti_3[:,1], betti_3[:,2], label="beta_3")
-
-                    heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(choice), number of points: $points_per_dim");
-
-                    betti_plot_ei_ref = plot(p1, heat_map1, layout = (2,1))
-
-                    if save_figures
-                        saving_figures(betti_plot_clq_ref, results_cliq, choice, points_per_dim, tau)
-                    end#save fig
-                end #plot eirene
-            end #for tau
-        end #for points_per_dim
-    end #for video set
-end #func
 
 # TODO add different types of choosing values from matrix {uniform, random, patch}
 # TODO Add listing of the sets
 # TODO Remove setting the file name
-
+# TODO Add new settings to the menu functionality
 start_menu(debug=true)
