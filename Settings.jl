@@ -55,7 +55,7 @@ test_params["points_per_dim"] = 9
 test_params["size_limiter"] = 20
 test_params["use_testing_set"] = true
 test_params["video_name"] = videos_names[video_choice]
-test_params["indicies_distribution"] = DISTRIBUTION.uniform
+test_params["ind_distrib"] = DISTRIBUTION.uniform
 
 #TODO saving and loading from file
 
@@ -66,4 +66,4 @@ test_params["indicies_distribution"] = DISTRIBUTION.uniform
 videos_set = [8 10]
 tau_max_set = [5 10 20 25]
 points_per_dim_set = [4 9 12]
-focus_center = Dict("x"=>1, "y"=>1)
+patch_params = Dict("x"=>1, "y"=>1, "spread" =>1)
