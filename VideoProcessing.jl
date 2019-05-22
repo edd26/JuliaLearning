@@ -375,12 +375,21 @@ end
 
 
 
+"""
+    get_local_total_correlations(video_array, centers, sub_img_size, shift)
 
-function get_local_total_correlations(video_array, centers, points_per_dim, shift)
-    half_size = ceil(Int,(points_per_dim-1)/2)
+Computes the correlation between the subimages and subimages shifted by values
+from range -@shift:@shift and returns array with frames of size
+length(@centers) x length(@centers) with the number of frames equal to the
+number of rames in @video_array.
+
+Each of the subimage is center around values stored in  @centers
+"""
+function get_local_total_correlations(video_array, centers, sub_img_size, shift)
+    half_size = ceil(Int,(sub_img_size-1)/2)
     half_range = half_size + shift
     h, w, len = get_video_dimension(video_array)
-    extracted_pixels = zeros(points_per_dim, points_per_dim, len)
+    extracted_pixels = zeros(sub_img_size, sub_img_size, len)
 
     for frame = 1:len
         img = video_array[frame]
@@ -394,12 +403,12 @@ function get_local_total_correlations(video_array, centers, points_per_dim, shif
 
                 for left_boundary = 1:(2*shift+1)
                     for lower_boundary = 1:(2*shift+1)
-                        corelation = center .* subimage[left_boundary:left_boundary+points_per_dim-1, lower_boundary:lower_boundary+points_per_dim-1]
+                        corelation = center .* subimage[left_boundary:left_boundary+sub_img_size-1, lower_boundary:lower_boundary+sub_img_size-1]
                         corelation = sum(corelation)
                         extracted_pixels[index_x, index_y, frame] += corelation
                     end
                 end
-                extracted_pixels[index_x, index_y, frame] /= 256*(points_per_dim^2)*(shift*2)^2
+                extracted_pixels[index_x, index_y, frame] /= 256*(sub_img_size^2)*(shift*2)^2
             end
         end
     end
