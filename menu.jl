@@ -31,8 +31,7 @@ end
 
 function get_menu_item_from_usr(max_range)
     @debug "Running get_menu_item_from_usr with param: " max_range
-    usr_input = get_input_from_usr()
-    action = validate_the_input(usr_input, max_range)
+    usr_input = get_input_from_usr()    action = validate_the_input(usr_input, max_range)
     return action
 end
 
@@ -457,4 +456,6 @@ menus_dict["testing"] = ("Testing Menu", testing_menu_items, testing_menu_action
 # TODO Add listing of the sets
 # TODO Remove setting the file name
 # TODO Add new settings to the menu functionality
+# TODO Add shifts to set up menu
+# TODO Ask to change the index distribution if shift set was changed.
 start_menu(debug=true)
