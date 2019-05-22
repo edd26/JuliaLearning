@@ -92,6 +92,10 @@ function execute_main_menu_action(action )
     catch err
         if isa(err, ArgumentError)
             println("Sth went wrong")
+        else
+            @error "An error occured during execution of main menu function"
+            println(err)
+            throw(err)
         end
     end
     return leave = false
@@ -113,7 +117,6 @@ function launch_menu(menu_name)
         print_menu_items(elements)
 
         action = get_menu_item_from_usr(num_of_actions)
-        @debug "action = " action
 
         if action > 0  &&  action < num_of_actions
             actions[action]()
@@ -438,7 +441,7 @@ testing_menu_actions = [disp_testing_options,
 testing_menu_items  = ["Display testing routine and parameters.",
             "Change the testing parameters.",
             "Set testing set.",
-            "Set maxial tau values set.",
+            "Set maximal tau values set.",
             "Set the number of points whcih will be extracted from the main matrix.",
             "Launch full testing (will ask and explain all parameters).",
             "Launch quick testing (uses set of currently set parameters).",
@@ -460,10 +463,10 @@ function testing_function()
 
     @debug "do_clique_top: " do_clique_top
 
-    function saving_figures(ref, path, video_name)
-        name = split(video_name, ".")[1]
+    function saving_figures(ref, path, choice, points_per_dim, tau)
+        name = split(choice, ".")[1]
         name =  path * name *
-                "_size$(size_limiter)_points$(points_per_dim)_tau$(tau_max).png"
+                "_size$(size_limiter)_points$(points_per_dim)_tau$(tau).png"
         savefig(ref, name)
 
         @info "File saved: " name
@@ -480,7 +483,7 @@ function testing_function()
         @info "Array extracted."
 
         video_dimensions = get_video_dimension(video_array)
-        for points_per_dim in points_per_dim_set #TODO add end for this loop
+        for points_per_dim in points_per_dim_set
             indicies_set = get_video_mask(points_per_dim, video_dimensions)
             @info "Mask extracted."
 
@@ -492,7 +495,7 @@ function testing_function()
 
             for tau in tau_max_set
                 ## Compute pairwise correlation
-                C_ij = get_pairwise_correlation_matrix(vectorized_video, tau_max)
+                C_ij = get_pairwise_correlation_matrix(vectorized_video, tau)
 
                 # set the diagonal to zero
                 for diag_elem in 1:size(C_ij,1)
@@ -524,11 +527,12 @@ function testing_function()
 
                 # --------------------------------------------------------------------
                 # Plot results
+                @debug "Proceeding to plotting."
                 if plot_vectorized_video
                     vector_plot_ref = heatmap(vectorized_video, color=:grays)
                     if save_figures
-                        name = split(video_name, ".")[1]
-                        name = "vec_" * name * "_sz$(size_limiter)_p$(points_per_dim)_tau$(tau_max).png"
+                        name = split(choice, ".")[1]
+                        name = "vec_" * name * "_sz$(size_limiter)_p$(points_per_dim)_tau$(tau).png"
                         savefig(vector_plot_ref, name)
                     end #save vec
                 end #plot vec
@@ -538,12 +542,12 @@ function testing_function()
                     title = "Betti curves for pairwise corr. matrix"
                     p1 = plot_betti_numbers(c_ij_betti_num, edge_density, title);
 
-                    heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(video_name), number of points: $points_per_dim");
+                    heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Pariwise Correlation matrix, number of points: $(points_per_dim)");
 
                     betti_plot_clq_ref = plot(p1, heat_map1, layout = (2,1))
 
                     if save_figures
-                        saving_figures(betti_plot_clq_ref, results_cliq, video_name)
+                        saving_figures(betti_plot_clq_ref, results_cliq, choice, points_per_dim, tau)
                     end#save fig
                 end #plot cliq
 
@@ -561,12 +565,12 @@ function testing_function()
                     plot!(betti_2[:,1], betti_2[:,2], label="beta_2")
                     plot!(betti_3[:,1], betti_3[:,2], label="beta_3")
 
-                    heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(video_name), number of points: $points_per_dim");
+                    heat_map1 = heatmap(C_ij,  color=:lightrainbow, title="Cij, $(choice), number of points: $points_per_dim");
 
                     betti_plot_ei_ref = plot(p1, heat_map1, layout = (2,1))
 
                     if save_figures
-                        saving_figures(betti_plot_ei_ref, results_eirene, video_name)
+                        saving_figures(betti_plot_clq_ref, results_cliq, choice, points_per_dim, tau)
                     end#save fig
                 end #plot eirene
             end #for tau
@@ -574,11 +578,8 @@ function testing_function()
     end #for video set
 end #func
 
-# TODO test functionality
-# TODO test saving files
 # TODO add different types of choosing values from matrix {uniform, random, patch}
 # TODO Add listing of the sets
 # TODO Remove setting the file name
-# TODO Do testing function testing as it crashes
 
 start_menu(debug=true)
