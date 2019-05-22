@@ -1,6 +1,6 @@
 include("Settings.jl")
 
-function start_menu(;debug=false)
+function startmenu(;debug=false)
     # TODO check for dependencies and then inlude the settings
     if debug
         ENV["JULIA_DEBUG"] = "all"
