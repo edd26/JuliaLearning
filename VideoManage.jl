@@ -1,9 +1,9 @@
 # import Makie
 import VideoIO
  using StatsBase
+ using Images
  using ImageFeatures
   # using TestImages
- using Images
  using ImageDraw
  using CoordinateTransformations
  # using Makie
@@ -48,15 +48,14 @@ function get_video_dimension(video_array)
 end
 
 """
-    get_video_mask(points_per_dim, video_dim_tuple; distribution="uniform", sorted=true)
+    get_video_mask(points_per_dim, video_dimensions; distribution="uniform", sorted=true, x=1, y=1)
 
 Returns matrix of size @points_per_dim x 2 in which indicies of video frame are
 stored. The indicies are chosen based one the @distribution argument. One option
 is uniform distribution, the second is random distribution.
 
-Uniform distribution: distance between the points in given dimension is the even,
-but vertical distance may be different from horizontal distance between points.
-This depends on the size of a frame in a image.
+Uniform distribution: distance between the points in given dimension is the
+ even, but vertical distance may be different from horizontal distance between points. This depends on the size of a frame in a image.
 
 Random distribution: the distance between the points is not constant, because
 the points are chosen randomly in the ranges 1:horizontal size of frame,
@@ -64,10 +63,30 @@ the points are chosen randomly in the ranges 1:horizontal size of frame,
 if @sorted=true.
 """
 function get_video_mask(points_per_dim, video_dimensions;
-                                           distribution="uniform", sorted=true)
+                            distribution="uniform", sorted=true, x=1, y=1)
     video_height = video_dimensions[1]
     video_width = video_dimensions[2]
+    if x == 1
+        x = Int64(floor(video_width/2))
+        @warn "Given x is to close to the border. Seeting the value to " x
+    elseif x < Int64(ceil(points_per_dim/2))
+        x = Int64(ceil(points_per_dim/2))
+        @warn "Given x is to close to the border. Seeting the value to " x
+    elseif x > video_width-Int64(ceil(points_per_dim/2))
+        x = video_width - Int64(ceil(points_per_dim/2))
+        @warn "Given x is to close to the border. Seeting the value to " x
+    end
 
+    if y == 1
+        y = Int64(floor(video_height/2))
+        @warn "Given y is to close to the border. Seeting the value to " y
+    elseif y < Int64(ceil(points_per_dim/2))
+        y = Int64(ceil(points_per_dim/2))
+        @warn "Given y is to close to the border. Seeting the value to " y
+    elseif y > video_height-Int64(ceil(points_per_dim/2))
+        y = video_height - Int64(ceil(points_per_dim/2))
+        @warn "Given y is to close to the border. Seeting the value to " y
+    end
 
     if distribution == "uniform"
         columns = points_per_dim
@@ -102,6 +121,9 @@ function get_video_mask(points_per_dim, video_dimensions;
                               reshape(horizontal_indicies, (1,points_per_dim))
         end
         indicies_set = [vertical_indicies; horizontal_indicies]
+
+    elseif distribution == "patch"
+        indicies_set = [collect(1:points_per_dim).+x collect(1:points_per_dim).+y]'
     end
 
    return indicies_set
