@@ -63,9 +63,13 @@ the points are chosen randomly in the ranges 1:horizontal size of frame,
 if @sorted=true.
 """
 function get_video_mask(points_per_dim, video_dimensions;
-                            distribution="uniform", sorted=true, x=1, y=1)
+                            distribution="uniform", sorted=true, patch_params)
     video_height = video_dimensions[1]
     video_width = video_dimensions[2]
+    x=patch_params["x"]
+    y=patch_params["y"]
+    spread=patch_params["spread"]
+
     if x == 1
         x = Int64(floor(video_width/2))
         @warn "Given x is to close to the border. Seeting the value to " x
@@ -88,6 +92,10 @@ function get_video_mask(points_per_dim, video_dimensions;
         @warn "Given y is to close to the border. Seeting the value to " y
     end
 
+    if spread*points_per_dim+x > video_width || spread*points_per_dim+y > video_height
+        @warn "Given patch parameters might result in indicies exceeding frame size."
+    end
+
     if distribution == "uniform"
         columns = points_per_dim
         rows = points_per_dim
@@ -107,7 +115,6 @@ function get_video_mask(points_per_dim, video_dimensions;
         horizontal_indicies = reshape(horizontal_indicies, (1,points_per_dim))
 
         indicies_set = [vertical_indicies; horizontal_indicies]
-
     elseif distribution == "random"
         vertical_indicies = rand(1:video_height,1, points_per_dim)
         horizontal_indicies = rand(1:video_width,1, points_per_dim)
@@ -121,9 +128,8 @@ function get_video_mask(points_per_dim, video_dimensions;
                               reshape(horizontal_indicies, (1,points_per_dim))
         end
         indicies_set = [vertical_indicies; horizontal_indicies]
-
     elseif distribution == "patch"
-        indicies_set = [collect(1:points_per_dim).+x collect(1:points_per_dim).+y]'
+        indicies_set = [collect(1:spread:(spread*points_per_dim)).+x collect(1:spread:(spread*points_per_dim)).+y]'
     end
 
    return indicies_set
