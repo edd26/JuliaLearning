@@ -19,7 +19,8 @@ VIDEO = (diag_1=1,
 DISTRIBUTION = (uniform="uniform",
                 random="random",
                 patch="patch",
-                local_corr="local_corr")
+                local_corr="local_corr",
+                local_grad="local_grad")
 
 video_choice = VIDEO.diag_1
 
@@ -44,7 +45,7 @@ results_vec_path = results_path*session_name*"/" # pwd()*"/vectorized"
 
 cd(current_path)
 
-videos_names = readdir(video_path)
+videos_names = readdir(video_path) # TODO The number of videos has to be controlled somehow
 
 # ---------------
 test_params = Dict()
@@ -56,12 +57,12 @@ test_params["plot_betti_figrues"] = true
 test_params["plot_vectorized_video"] = true
 test_params["tau_max"] = 25
 test_params["points_per_dim"] = 9
-test_params["size_limiter"] = 20
+test_params["size_limiter"] = 40
 test_params["use_testing_set"] = true
 test_params["video_name"] = videos_names[video_choice]
-test_params["ind_distrib"] = DISTRIBUTION.uniform
+test_params["ind_distrib"] = DISTRIBUTION.local_grad
 test_params["shift_set"] = [2 4]
-test_params["sub_img_size_set"] = [9]
+test_params["sub_img_size_set"] = [25 30]
 
 #TODO saving and loading from multiple files with JSON package
 
@@ -69,8 +70,8 @@ test_params["sub_img_size_set"] = [9]
 # tau_max_set = [test_params["tau_max"]]
 # points_per_dim_set = [test_params["points_per_dim"]]
 
-videos_set = [8 10]
-tau_max_set = [5 10 20 25]
-points_per_dim_set = [4 9 12]
-shifts_set = [2 4]
+videos_set = collect(1:length(videos_names))
+tau_max_set = [50]
+points_per_dim_set = [9]
+shifts_set = [0]
 patch_params = Dict("x"=>1, "y"=>1, "spread" =>1)
