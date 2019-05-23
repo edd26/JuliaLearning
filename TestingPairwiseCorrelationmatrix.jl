@@ -39,11 +39,13 @@ function testing_pariwise_corr()
     ind_distrib = test_params["ind_distrib"]
     do_local_corr = false
 
-    if ind_distrib = "local_corr"
+    if ind_distrib = "local_corr" || ind_distrib = "local_grad"
         shift_set = test_params["shift_set"]
+        sub_img_size_set = test_params["sub_img_size_set"]
         do_local_corr = true
     else
         shift_set = [1]
+        sub_img_size_set = [9]
         do_local_corr = false
     end
 
@@ -59,15 +61,16 @@ function testing_pariwise_corr()
 
         video_dimensions = get_video_dimension(video_array)
         for points_per_dim in points_per_dim_set
-            for shift in shift_set
+            for shift in shift_set, sub_img_size in sub_img_size_set
                 if do_local_corr
+                    sub_img_size = points_per_dim
                     start_ind = ceil(Int, points_per_dim/2) + shift
                     last_ind = video_dimensions.video_height - start_ind
 
                     set = broadcast(floor, Int, range(start_ind, stop=last_ind,  length=points_per_dim))
                     centers = [set set]'
 
-                    extracted_pixels_matrix = get_local_total_correlations(video_array, centers, points_per_dim, shift)
+                    extracted_pixels_matrix = get_local_total_correlations(video_array, centers, sub_img_size, shift)
                 else
                     indicies_set = get_video_mask(points_per_dim, video_dimensions,  distribution=ind_distrib, patch_params)
 
@@ -110,7 +113,7 @@ function testing_pariwise_corr()
                         C = eirene(C_ij[1:size_limiter, 1:size_limiter],maxdim=3,model="vr")
                     end
 
-                    # --------------------------------------------------------------------
+                    # ---------------------------------------------------------
                     # Plot results
                     @debug "Proceeding to plotting."
                     if plot_vectorized_video
