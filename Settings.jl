@@ -1,4 +1,4 @@
-using Plots
+# using Plots
 using Dates
 
 # include("TestingPairwiseCorrelationmatrix.jl")
@@ -61,6 +61,7 @@ test_params["use_testing_set"] = true
 test_params["video_name"] = videos_names[video_choice]
 test_params["ind_distrib"] = DISTRIBUTION.uniform
 test_params["shift_set"] = [2 4]
+test_params["sub_img_size_set"] = [9]
 
 #TODO saving and loading from multiple files with JSON package
 
