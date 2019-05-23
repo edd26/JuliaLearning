@@ -1,15 +1,14 @@
 # using Images
 using Plots
-using ImageFiltering
-using ImageView
-
-include("VideoProcessing.jl")
-include("Settings.jl")
+ using ImageFiltering
+ using ImageView
+ include("VideoProcessing.jl")
+ include("Settings.jl")
 
  ENV["JULIA_DEBUG"] = "all"
 
 
-choice =  VIDEO.candle
+choice =  VIDEO.reef
  video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
  video_generated = "/home/ed19aaf/Programming/Julia/JuliaLearning/video_generated/"
  @info "Video path is set to:" video_path
@@ -50,7 +49,8 @@ video_array = get_video_array_from_file(video_path*choice)
 video_dimensions = get_video_dimension(video_array)
 
 
-img = video_array[1]
+full_img = video_array[1]
+img = full_img[1:150, 1:150]
  imshow(img)
 
 
@@ -58,7 +58,7 @@ img_filt = imfilter(img, Kernel.gaussian(5))
  imshow(img_filt)
 
 
-img_dog = imfilter(img, Kernel.DoG(8))
+img_dog = imfilter(img, Kernel.DoG(5))
  imshow(img_dog)
 
 
@@ -77,6 +77,19 @@ kernel = centered(rand(3,3))
 img_gradient = imgradients(img, KernelFactors.ando3, "replicate")
 im1 = imshow(img_gradient[1])
 im2 = imshow(img_gradient[2])
+
+
+abs_gradient = map(abs, img_gradient[1]) + map(abs, img_gradient[2])
+  imshow(abs_gradient)
+  max_val, max_coord = findmax(abs_gradient)
+  mean_val = mean(abs_gradient)
+
+  a = (abs_gradient .> (max_val-mean_val)/3)
+  imshow(a)
+  mean(a)
+
+  abs_gradient_filt = imfilter(abs_gradient, Kernel.gaussian(1))
+  imshow(abs_gradient_filt)
 
 # gaussian pyramid
 n_scales = 2
