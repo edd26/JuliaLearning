@@ -1,9 +1,12 @@
 using Eirene
+using Plots
 include("clique_top_Julia/CliqueTop.jl")
 include("VideoProcessing.jl")
 include("MatrixToolbox.jl")
+include("Settings.jl")
 
-function saving_figures(ref, path, choice, points_per_dim, tau)
+
+function saving_figures(ref, path, choice, points_per_dim, tau, size_limiter)
     name = split(choice, ".")[1]
     name =  path * name *
             "_size$(size_limiter)_points$(points_per_dim)_tau$(tau).png"
@@ -38,16 +41,27 @@ function testing_pariwise_corr()
     size_limiter = test_params["size_limiter"]
     ind_distrib = test_params["ind_distrib"]
     do_local_corr = false
+    do_local_grad = false
 
-    if ind_distrib = "local_corr" || ind_distrib = "local_grad"
+    if ind_distrib == "local_corr"
         shift_set = test_params["shift_set"]
-        sub_img_size_set = test_params["sub_img_size_set"]
+        sub_img_size_set = [9]
         do_local_corr = true
+        do_local_grad = false
+        @debug "Doing local correlation" do_local_corr
+    elseif ind_distrib == "local_grad"
+        shift_set = [1]
+        sub_img_size_set = test_params["sub_img_size_set"]
+        do_local_corr = false
+        do_local_grad = true
+        @debug "Doing local gradient" do_local_grad
     else
         shift_set = [1]
         sub_img_size_set = [9]
         do_local_corr = false
+        do_local_grad = false
     end
+    @info "Using following distribution: " test_params["ind_distrib"]
 
     @debug "All videos are: " videos_names
     @debug "Video set is : " videos_set
@@ -63,17 +77,15 @@ function testing_pariwise_corr()
         for points_per_dim in points_per_dim_set
             for shift in shift_set, sub_img_size in sub_img_size_set
                 if do_local_corr
-                    sub_img_size = points_per_dim
-                    start_ind = ceil(Int, points_per_dim/2) + shift
-                    last_ind = video_dimensions.video_height - start_ind
+                    centers = get_local_centers(points_per_dim, video_dimensions, shift, sub_img_size)
 
-                    set = broadcast(floor, Int, range(start_ind, stop=last_ind,  length=points_per_dim))
-                    centers = [set set]'
+                    extracted_pixels_matrix = get_local_correlations(video_array, centers, sub_img_size, shift)
+                elseif do_local_grad
+                    centers = get_local_centers(points_per_dim, video_dimensions, shift, sub_img_size)
 
-                    extracted_pixels_matrix = get_local_total_correlations(video_array, centers, sub_img_size, shift)
+                    extracted_pixels_matrix = get_local_gradients(video_array, centers, sub_img_size)
                 else
                     indicies_set = get_video_mask(points_per_dim, video_dimensions,  distribution=ind_distrib, patch_params)
-
                     extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
                 end
                 @info "Pixels extracted."
@@ -135,7 +147,7 @@ function testing_pariwise_corr()
                         betti_plot_clq_ref = plot(p1, heat_map1, layout = (2,1))
 
                         if save_figures
-                            saving_figures(betti_plot_clq_ref, results_cliq_path, choice, points_per_dim, tau)
+                            saving_figures(betti_plot_clq_ref, results_cliq_path, choice, points_per_dim, tau, size_limiter)
                         end#save fig
                     end #plot cliq
 
@@ -144,11 +156,12 @@ function testing_pariwise_corr()
                         betti_plot_ei_ref = plot(p1, heat_map1, layout = (2,1))
 
                         if save_figures
-                            saving_figures(betti_plot_ei_ref, results_cliq_path, choice, points_per_dim, tau)
+                            saving_figures(betti_plot_ei_ref, results_cliq_path, choice, points_per_dim, tau, size_limiter)
                         end#save fig
                     end #plot eirene
                 end #for tau
             end #for shift
         end #for points_per_dim
     end #for video set
+    @info "Finished testing"
 end #func
