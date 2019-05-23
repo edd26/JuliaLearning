@@ -64,9 +64,7 @@ if @sorted=true.
 """
 function get_video_mask(points_per_dim, video_dimensions;
                             distribution="uniform", sorted=true, patch_params)
-    video_height = video_dimensions[1]
-    video_width = video_dimensions[2]
-    x=patch_params["x"]
+    video_height, video_width,  = video_dimensions
     y=patch_params["y"]
     spread=patch_params["spread"]
 
@@ -416,8 +414,12 @@ function get_local_correlations(video_array, centers, sub_img_size, shift)
 end
 
 
-function get_local_centers(points_per_dim, video_dimensions, shift=0)
-    start_ind = ceil(Int, points_per_dim/2) + shift
+function get_local_centers(points_per_dim, video_dimensions, shift=0, sub_img_size=0 )
+    /# TODO Applied teproray solution here, so it works only for local gradients
+    # start = 0
+    # (points_per_dim>shift) ? start_ind = ceil(Int, points_per_dim/2)+ shift :
+    #                         start=shift
+    start_ind = ceil(Int, sub_img_size/2)
     min_va,  = findmin(video_dimensions)
     last_ind = min_va - start_ind
 
@@ -435,11 +437,13 @@ values of both hotizontal and vertical gradients as a representative of a
 subimage.
 """
 function get_local_gradients(video_array, centers, sub_img_size)
+    @debug "Entering get_local_gradients"
     half_size = ceil(Int,(sub_img_size-1)/2)
     half_range = half_size
     h, w, len = get_video_dimension(video_array)
     extracted_pixels = zeros(sub_img_size, sub_img_size, len)
 
+    @debug "starting frame procesing"
     for frame = 1:len
         img = video_array[frame]
         img_grad = imgradients(img, KernelFactors.ando3, "replicate")
@@ -454,6 +458,7 @@ function get_local_gradients(video_array, centers, sub_img_size)
                 extracted_pixels[index_x, index_y, frame] =mean(sub_img)
             end
         end
+        # @debug "Next frame" frame
     end
     return extracted_pixels
 end
