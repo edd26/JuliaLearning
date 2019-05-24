@@ -513,8 +513,12 @@ end
 
 Display an image as a plot. The values from the input matrix are adjusted to the
 value range of [0, 1].
+
+I @cut_off is true then the matrix values above 256 are set to 256 and then all
+values are normalized to the value 256. If @cut_off is false, then values are
+normalized to maximal value.
 """
-function plotimg(matrix_to_plot)
+function plotimg(matrix_to_plot, cut_off=false)
     matrix_type = typeof(matrix_to_plot)
     min_val = findmin(matrix_to_plot)[1]
     int_types_arr = [Matrix{UInt8}; Matrix{UInt16}; Matrix{UInt32};
@@ -528,6 +532,10 @@ function plotimg(matrix_to_plot)
     end
 
     max_val = findmax(matrix_to_plot)[1]
+
+    if max_val > 256 && cut_off
+        matrix_to_plot[findall(x -> x>256, matrix_to_plot)] = 256
+    end
 
     if in(matrix_type, int_types_arr)
         matrix_to_plot = normalize_to_01(matrix_to_plot)
