@@ -5,10 +5,10 @@ using Plots
  include("VideoProcessing.jl")
  include("Settings.jl")
 
- ENV["JULIA_DEBUG"] = "all"
+ENV["JULIA_DEBUG"] = "all"
 
 
-choice =  VIDEO.reef
+choice =  VIDEO.candle
  video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
  video_generated = "/home/ed19aaf/Programming/Julia/JuliaLearning/video_generated/"
  @info "Video path is set to:" video_path
@@ -50,34 +50,48 @@ video_dimensions = get_video_dimension(video_array)
 
 
 full_img = video_array[1]
-img = full_img[1:150, 1:150]
+img = full_img#[1:150, 1:150]
  imshow(img)
+ plotimg(img)
 
 
 img_filt = imfilter(img, Kernel.gaussian(5))
  imshow(img_filt)
+ plotimg(img_filt)
 
 
 img_dog = imfilter(img, Kernel.DoG(5))
  imshow(img_dog)
+ plotimg(img_dog)
 
 
 imgl = imfilter(img, Kernel.Laplacian());
  imshow(imgl)
+ plotimg(imgl)
+
 
 
 img_LoG = imfilter(img, Kernel.LoG(7));
  imshow(img_LoG)
+ plotimg(img_LoG)
 
 
 kernel = centered(rand(3,3))
  img_ker = imfilter(img,kernel)
  imshow(img_ker)
+ plotimg(img_ker)
+
+
 # Gradient
-img_gradient = imgradients(img, KernelFactors.ando3, "replicate")
+img_gradient = imgradients(full_img, KernelFactors.ando3, "replicate")
 im1 = imshow(img_gradient[1])
 im2 = imshow(img_gradient[2])
 
+plotimg(img_gradient[1])
+plotimg(img_gradient[2])
+
+save("vertical_gradient.png", colorview(Gray, normalize_to_01(img_gradient[1])))
+save("horizontal_gradient.png", colorview(Gray, normalize_to_01(img_gradient[2])))
 
 abs_gradient = map(abs, img_gradient[1]) + map(abs, img_gradient[2])
   imshow(abs_gradient)
