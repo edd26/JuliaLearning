@@ -9,8 +9,8 @@ ENV["JULIA_DEBUG"] = "all"
 
 
 choice =  VIDEO.candle
- video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
- video_generated = "/home/ed19aaf/Programming/Julia/JuliaLearning/video_generated/"
+ # video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
+ # video_generated = "/home/ed19aaf/Programming/Julia/JuliaLearning/video_generated/"
  @info "Video path is set to:" video_path
 
 
@@ -56,36 +56,36 @@ img = full_img#[1:150, 1:150]
 
 
 img_filt = imfilter(img, Kernel.gaussian(5))
- imshow(img_filt)
+ # imshow(img_filt)
  plotimg(img_filt)
 
 
 img_dog = imfilter(img, Kernel.DoG(5))
- imshow(img_dog)
+ # imshow(img_dog)
  plotimg(img_dog)
 
 
 imgl = imfilter(img, Kernel.Laplacian());
- imshow(imgl)
+ # imshow(imgl)
  plotimg(imgl)
 
 
 
 img_LoG = imfilter(img, Kernel.LoG(7));
- imshow(img_LoG)
+ # imshow(img_LoG)
  plotimg(img_LoG)
 
 
 kernel = centered(rand(3,3))
  img_ker = imfilter(img,kernel)
- imshow(img_ker)
+ # imshow(img_ker)
  plotimg(img_ker)
 
 
 # Gradient
 img_gradient = imgradients(full_img, KernelFactors.ando3, "replicate")
-im1 = imshow(img_gradient[1])
-im2 = imshow(img_gradient[2])
+# im1 = imshow(img_gradient[1])
+# im2 = imshow(img_gradient[2])
 
 plotimg(img_gradient[1])
 plotimg(img_gradient[2])
@@ -94,14 +94,16 @@ save(results_path*"vertical_gradient2.png", colorview(Gray, normalize_to_01(img_
 save(results_path*"horizontal_gradient2.png", colorview(Gray, normalize_to_01(img_gradient[2])))
 
 abs_gradient = map(abs, img_gradient[1]) + map(abs, img_gradient[2])
-  imshow(abs_gradient)
+  # imshow(abs_gradient)
   plotimg(abs_gradient)
+  save(results_path*"abs_sum_gradient.png", colorview(Gray, normalize_to_01(img_gradient[2])))
   max_val, max_coord = findmax(abs_gradient)
   mean_val = mean(abs_gradient)
 
 
+
   abs_gradient_filt = imfilter(abs_gradient, Kernel.gaussian(1))
-  imshow(abs_gradient_filt)
+  # imshow(abs_gradient_filt)
 
 # gaussian pyramid
 n_scales = 2
