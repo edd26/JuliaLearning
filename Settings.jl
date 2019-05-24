@@ -24,8 +24,10 @@ DISTRIBUTION = (uniform="uniform",
 
 video_choice = VIDEO.diag_1
 
-video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
-results_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/results/"
+
+execution_path = pwd()
+video_path = execution_path*"/videos/"
+results_path = execution_path*"/results/"
 
 session_number = Dates.value(Dates.now() - Dates.DateTime(Dates.today()))
 session_name =  string(Dates.today()) * "-"*string(session_number)
