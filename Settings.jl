@@ -77,3 +77,8 @@ tau_max_set = [50]
 points_per_dim_set = [9]
 shifts_set = [0]
 patch_params = Dict("x"=>1, "y"=>1, "spread" =>1)
+
+
+# TODO script for checking the dependencies (which may be stored in JSON file)
+# TODO Add script for removing empty folders
+# TODO add try-catch to the main manu which cathces dependency errors and then launches the script for dependency check
