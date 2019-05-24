@@ -90,17 +90,15 @@ im2 = imshow(img_gradient[2])
 plotimg(img_gradient[1])
 plotimg(img_gradient[2])
 
-save("vertical_gradient.png", colorview(Gray, normalize_to_01(img_gradient[1])))
-save("horizontal_gradient.png", colorview(Gray, normalize_to_01(img_gradient[2])))
+save(results_path*"vertical_gradient2.png", colorview(Gray, normalize_to_01(img_gradient[1])))
+save(results_path*"horizontal_gradient2.png", colorview(Gray, normalize_to_01(img_gradient[2])))
 
 abs_gradient = map(abs, img_gradient[1]) + map(abs, img_gradient[2])
   imshow(abs_gradient)
+  plotimg(abs_gradient)
   max_val, max_coord = findmax(abs_gradient)
   mean_val = mean(abs_gradient)
 
-  a = (abs_gradient .> (max_val-mean_val)/3)
-  imshow(a)
-  mean(a)
 
   abs_gradient_filt = imfilter(abs_gradient, Kernel.gaussian(1))
   imshow(abs_gradient_filt)
