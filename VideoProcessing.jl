@@ -462,3 +462,78 @@ function get_local_gradients(video_array, centers, sub_img_size)
     end
     return extracted_pixels
 end
+
+"""
+    normalize_to_01(matrix, norm_factor=256)
+
+Returns a matrix which values are in range [0, 1]. If the values in the input
+matrix are below 0, then they are shifted so that only positive numbers are in
+the matrix. If the values in the matrix of shifted matrix excced value of the
+@norm_factor parameter, then the matrix is normalized to the maximal value from
+the matrix.
+"""
+function normalize_to_01(matrix, norm_factor=256)
+    normalized_matrix = copy(matrix)
+    min_val = findmin(normalized_matrix)[1]
+    max_val = findmax(normalized_matrix)[1]
+
+    if min_val < 0
+        normalized_matrix .-= min_val
+    end
+
+    if max_val > norm_factor
+        @warn "Values normalized to maximal value, not notmalization factor."
+        normalized_matrix = normalized_matrix./max_val
+    else
+        normalized_matrix = normalized_matrix./norm_factor
+    end
+    return normalized_matrix
+end
+
+"""
+    shift_to_non_negative(matrix)
+
+Returns a matrix in which values are non-negative. This is done by finding the
+minimal value in the input matrix and adding its absolute value to the matix
+elements.
+"""
+function shift_to_non_negative(matrix)
+
+    min_val = findmin(matrix)[1]
+    if min_val < 0
+        return matrix .-= min_val
+    else
+        return matrix
+    end
+end
+
+
+"""
+    plotimg(matrix_to_plot)
+
+Display an image as a plot. The values from the input matrix are adjusted to the
+value range of [0, 1].
+"""
+function plotimg(matrix_to_plot)
+    matrix_type = typeof(matrix_to_plot)
+    min_val = findmin(matrix_to_plot)[1]
+    int_types_arr = [Matrix{UInt8}; Matrix{UInt16}; Matrix{UInt32};
+                    Matrix{UInt64}; Matrix{UInt128}; Matrix{Int8};
+                    Matrix{Int16}; Matrix{Int32}; Matrix{Int64};
+                    Matrix{Int128}]
+    float_types_arr = [Matrix{Float16} Matrix{Float32} Matrix{Float64}]
+
+    if min_val<0
+        matrix_to_plot = shift_to_non_negative(matrix_to_plot)
+    end
+
+    max_val = findmax(matrix_to_plot)[1]
+
+    if in(matrix_type, int_types_arr)
+        matrix_to_plot = normalize_to_01(matrix_to_plot)
+    elseif in(matrix_type, float_types_arr)
+        matrix_to_plot = normalize_to_01(matrix_to_plot, max_val)
+    end
+
+    return colorview(Gray, matrix_to_plot)
+end
