@@ -126,13 +126,13 @@ if test_params["create_new_sessions"]
         # mkdir(results_path*session_name*"/eirene")
         # mkdir(results_path*session_name*"/vectorized")
     end
-    results_cliq_path = results_path*session_name*"/" # pwd()*"/clique_top"
-    results_eirene_path = results_path*session_name*"/" # pwd()*"/eirene"
-    results_vec_path = results_path*session_name*"/" # pwd()*"/vectorized"
+    results_cliq_path = test_params["results_path"]*session_name*"/" # pwd()*"/clique_top"
+    results_eirene_path = test_params["results_path"]*session_name*"/" # pwd()*"/eirene"
+    results_vec_path = test_params["results_path"]*session_name*"/" # pwd()*"/vectorized"
 else
-    results_cliq_path = results_path*"/" # pwd()*"/clique_top"
-    results_eirene_path = results_path*"/" # pwd()*"/eirene"
-    results_vec_path = results_path*"/" # pwd()*"/vectorized"
+    results_cliq_path = test_params["results_path"]*"/" # pwd()*"/clique_top"
+    results_eirene_path = test_params["results_path"]*"/" # pwd()*"/eirene"
+    results_vec_path = test_params["results_path"]*"/" # pwd()*"/vectorized"
 end
 
 test_params["tau_max_set"] = [50]
