@@ -7,7 +7,7 @@ using Plots
 
 ENV["JULIA_DEBUG"] = "all"
 save_files = false
-
+results_path = test_params["results_path"]
 
 choice =  VIDEO.reef
  @info "Video path is set to:" video_path

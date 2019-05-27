@@ -12,8 +12,8 @@ VIDEO = (diag_1=1,
            horiz=7)
 
 choice = VIDEO.horiz
- video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
- video_generated = "/home/ed19aaf/Programming/Julia/JuliaLearning/video_generated/"
+ video_path = pwd()*"/videos/"
+ video_generated = pwd()*"/video_generated/"
  @info "Video path is set to:" video_path
 
 

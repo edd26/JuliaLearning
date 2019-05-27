@@ -45,6 +45,8 @@ function testing_pariwise_corr()
     points_per_dim_set = test_params["points_per_dim_set"]
     shifts_set = test_params["shifts_set"]
     patch_params = test_params["patch_params"]
+    video_path = test_params["video_path"]
+    results_path = test_params["results_path"]
 
 
     do_local_corr = false

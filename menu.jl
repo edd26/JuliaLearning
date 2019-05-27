@@ -134,9 +134,7 @@ function proceed()
 end
 
 function print_path_info()
-    println("Video path is set to:")
-    println(video_path)
-    println()
+    print_video_path_info()
     println("Results path is set to:")
     println(results_path)
     println()
@@ -148,7 +146,7 @@ end
 
     function print_video_path_info()
         println("Video path is set to:")
-        println(video_path)
+        println(test_params["video_path"])
         println()
     end
 
@@ -184,36 +182,36 @@ end
         end #while get_input_from_usr
     end #function
 
-    function disp_loaded_file_name()
-        println("Loaded file name is:")
-        println(test_params["video_name"])
-        println()
-    end
+    # function disp_loaded_file_name()
+    #     println("Loaded file name is:")
+    #     println(test_params["video_name"])
+    #     println()
+    # end
 
 # TODO remove this function as the test are done on set instead of this value
-    function change_vid_from_list()
-        @debug "Launching change_vid_from_list."
-        println("Please select single number of the listed videos: ")
-        action = choose_listed_video()
-        @debug "Menu action from usr: " action
-
-        if action > 0
-            new_name = videos_names[action]
-            @debug "new_name: " new_name
-            @debug "isfile: " isfile(video_path*new_name)
-            if isfile(video_path*new_name)
-                delete!(test_params, "video_name")
-                test_params["video_name"] = new_name
-                @debug "The name was changed to: " test_params["video_name"]
-                println("New file name was succesfully changed.")
-            else
-                println("Error occurred. File from the list can not be found at vieo path!")
-            end
-        else
-            @debug action
-        end
-        @debug "New file name: " test_params["video_name"]
-    end
+    # function change_vid_from_list()
+    #     @debug "Launching change_vid_from_list."
+    #     println("Please select single number of the listed videos: ")
+    #     action = choose_listed_video()
+    #     @debug "Menu action from usr: " action
+    #
+    #     if action > 0
+    #         new_name = videos_names[action]
+    #         @debug "new_name: " new_name
+    #         @debug "isfile: " isfile(video_path*new_name)
+    #         if isfile(video_path*new_name)
+    #             delete!(test_params, "video_name")
+    #             test_params["video_name"] = new_name
+    #             @debug "The name was changed to: " test_params["video_name"]
+    #             println("New file name was succesfully changed.")
+    #         else
+    #             println("Error occurred. File from the list can not be found at vieo path!")
+    #         end
+    #     else
+    #         @debug action
+    #     end
+    #     @debug "New file name: " test_params["video_name"]
+    # end
 
 # TODO same as above
     function change_vid_name()
@@ -277,14 +275,14 @@ end
         println("""
         Use clique-top library:                 $(test_params["do_clique_top"])
         Use Eirene library:                     $(test_params["do_eirene"])
-        Selected video:                         $(test_params["video_name"])
+
         Plot Betti curves:                      $(test_params["plot_betti_figrues"])
         Plot vectorized video:                  $(test_params["do_clique_top"])
         Save figures:                           $(test_params["save_figures"])
-        τ_max:                                  $(test_params["tau_max"])
+
         Number of points in mask:               $(test_params["points_per_dim"])
         Maximal size of pairwise corr. matrix:  $(test_params["size_limiter"])
-        """)
+        """) # τ_max:                                  $(test_params["tau_max"])         Selected video:                         $(test_params["video_name"])
         println("End of options")
     end
 
@@ -418,8 +416,6 @@ main_menu_action = [print_path_info,
 
 video_menu_actions = [print_video_path_info,
                         change_vid_path,
-                        disp_loaded_file_name,
-                        change_vid_from_list,
                         change_vid_name,
                         proceed]
 video_menu_items  = ["Display currennt video path.",
