@@ -24,6 +24,9 @@ In the repository there are few scripts which can be run as standalone scripts. 
   * running TestingPairwiseCorrelationmatrix.jl script
   * adjustment of the parameters used in the above script.
 
+### Test scripts
+In order to test if some of the packages are properly installed, the scripts form "test_scripts" folder may be used.
+
 ## Local packages
 In this repository there are few packages which contain functions  which are necessary to run above scripts. Those are:
 * GifGenerator.jl - package in which
