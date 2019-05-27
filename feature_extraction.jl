@@ -6,11 +6,10 @@ using Plots
  include("Settings.jl")
 
 ENV["JULIA_DEBUG"] = "all"
+save_files = false
 
 
-choice =  VIDEO.candle
- # video_path = "/home/ed19aaf/Programming/Julia/JuliaLearning/videos/"
- # video_generated = "/home/ed19aaf/Programming/Julia/JuliaLearning/video_generated/"
+choice =  VIDEO.reef
  @info "Video path is set to:" video_path
 
 
@@ -51,59 +50,51 @@ video_dimensions = get_video_dimension(video_array)
 
 full_img = video_array[1]
 img = full_img#[1:150, 1:150]
- imshow(img)
  plotimg(img)
+ save(results_path*"$(split(choice, ".")[1]).png", colorview(Gray, normalize_to_01(img)))
 
 
 img_filt = imfilter(img, Kernel.gaussian(5))
- # imshow(img_filt)
  plotimg(img_filt)
 
 
 img_dog = imfilter(img, Kernel.DoG(5))
- # imshow(img_dog)
  plotimg(img_dog)
 
 
 imgl = imfilter(img, Kernel.Laplacian());
- # imshow(imgl)
  plotimg(imgl)
 
 
-
 img_LoG = imfilter(img, Kernel.LoG(7));
- # imshow(img_LoG)
  plotimg(img_LoG)
 
 
 kernel = centered(rand(3,3))
  img_ker = imfilter(img,kernel)
- # imshow(img_ker)
  plotimg(img_ker)
 
 
 # Gradient
 img_gradient = imgradients(full_img, KernelFactors.ando3, "replicate")
-# im1 = imshow(img_gradient[1])
-# im2 = imshow(img_gradient[2])
-
 plotimg(img_gradient[1])
 plotimg(img_gradient[2])
 
-save(results_path*"vertical_gradient2.png", colorview(Gray, normalize_to_01(img_gradient[1])))
-save(results_path*"horizontal_gradient2.png", colorview(Gray, normalize_to_01(img_gradient[2])))
+if save_files
+  save(results_path*"vertical_gradient_chceck.png", colorview(Gray, normalize_to_01(img_gradient[1])))
+  save(results_path*"horizontal_gradient_chceck.png", colorview(Gray, normalize_to_01(img_gradient[2])))
+end
 
 abs_gradient = map(abs, img_gradient[1]) + map(abs, img_gradient[2])
-  # imshow(abs_gradient)
   plotimg(abs_gradient)
-  save(results_path*"abs_sum_gradient.png", colorview(Gray, normalize_to_01(img_gradient[2])))
   max_val, max_coord = findmax(abs_gradient)
   mean_val = mean(abs_gradient)
+  if save_files
+    save(results_path*"abs_sum_gradient_chceck.png", colorview(Gray, normalize_to_01(abs_gradient)))
+  end
 
+abs_gradient_filt = imfilter(abs_gradient, Kernel.gaussian(1))
 
-
-  abs_gradient_filt = imfilter(abs_gradient, Kernel.gaussian(1))
-  # imshow(abs_gradient_filt)
 
 # gaussian pyramid
 n_scales = 2
@@ -111,12 +102,4 @@ downsample = 2
 sigma = 0.5
 pyramid = gaussian_pyramid(img, n_scales, downsample, sigma)
 
-imshow(pyramid[5])
-
-# Left for future processing
-# indicies_set = get_video_mask(points_per_dim, video_dimensions,  distribution=ind_distrib, patch_params)
-#
-# extracted_pixels_matrix = extract_pixels_from_video(video_array, indicies_set, video_dimensions)
-# @info "Pixels extracted."
-#
-# vectorized_video = vectorize_video(extracted_pixels_matrix)
+plotimg(pyramid[2])
