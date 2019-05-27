@@ -147,3 +147,4 @@ test_params["videos_set"] = collect(1:length(test_params["videos_names"]))
 # TODO script for checking the dependencies (which may be stored in JSON file)
 # TODO Add script for removing empty folders
 # TODO add try-catch to the main manu which cathces dependency errors and then launches the script for dependency check
+# TODO In MatrixToolbox.jl: the generation of graph takes place without the coordinates of the vertices- they should be added to the procedure.
