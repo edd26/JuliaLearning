@@ -1,8 +1,7 @@
-using Dates
 """
 This script contains the variables for the testing of the
-    TestingPairwiseCorrelationmatrix script. All of them are stored int the
-    test_params dictionary. The options are stored under follownig keys:
+TestingPairwiseCorrelationmatrix script. All of them are stored int the
+test_params dictionary. The options are stored under follownig keys:
     - The boolean flags:
         * do_clique_top - enables/disables persistent homology computations with
             Julia version of MATLAB clique-top lirbary
@@ -46,7 +45,29 @@ This script contains the variables for the testing of the
             "local_grad"}, not single pixels are extracted from an image, but a
             values which is computed based on the surroundings of the pixels;
             this parameters detemines the size of the surroundings.
+
+Also, named tuples are created:
+    * DISTRIBUTION - contains the information about how the signal source form
+        a frame should be extracted; possible options are:
+        * uniform - pixels which are used as signal sources are distributed
+            uniformly accross the columns and rows of a frame;
+        * random - distance between following pixels in a row and column
+            are distributed randomly;
+        * patch - instead of extracting single pixel value from an image, an
+            average around it is extracted; the centers are distributed
+            uniformly accross a frame; the size of a patch is desribed by the
+            parameter stored in the test_params["sub_img_size_set"]
+        * local_corr - instead of extracting single pixel value from an image,
+            correlation of the subimage of size test_params["sub_img_size_set"]
+            and the subimage of same size, but shifted by the values from range
+            [-test_params["shift_set"]:test_params["shift_set"]] for each pixel
+            center; the size of a subimage is desribed by the parameter stored
+            in the test_params["sub_img_size_set"].
+        * local_grad - instead of extracting single pixel value from an image,
+            for each pixel center gradients of the subimages (size= test_params["sub_img_size_set"]) are taken;
 """
+
+using Dates
 
 VIDEO = (diag_1=1,
             diag_2=2,
@@ -69,20 +90,13 @@ DISTRIBUTION = (uniform="uniform",
 test_params = Dict()
 test_params["do_clique_top"] = true
 test_params["do_eirene"] = false
-# test_params["choice"] = VIDEO.diag_gb
 test_params["save_figures"] = true
 test_params["plot_betti_figrues"] = true
 test_params["plot_vectorized_video"] = true
 test_params["create_new_sessions"] = true
-
-# test_params["tau_max"] = 25 # may become obsolette due to the tau-set parameter
-# test_params["points_per_dim"] = 9# may become obsolette due to the tau-set parameter
 test_params["size_limiter"] = 40
-# test_params["use_testing_set"] = true
-# test_params["video_name"] = videos_names[video_choice] # may become obsolette due to the tau-set parameter
 test_params["ind_distrib"] = DISTRIBUTION.local_grad
 test_params["patch_params"] = Dict("x"=>1, "y"=>1, "spread" =>1)
-
 
 execution_path = pwd()
 test_params["video_path"] = execution_path*"/videos/"
@@ -115,7 +129,6 @@ test_params["videos_names"] = readdir(test_params["video_path"])
 test_params["videos_set"] = collect(1:length(test_params["videos_names"]))
 
 
-# TODO The number of videos  in videos_names has to be controlled somehow
 # TODO saving and loading from multiple files with JSON package
 # TODO script for checking the dependencies (which may be stored in JSON file)
 # TODO Add script for removing empty folders
