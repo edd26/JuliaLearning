@@ -1,7 +1,16 @@
 """
 This script contains the variables for the testing of the
 TestingPairwiseCorrelationmatrix script. All of them are stored int the
-test_params dictionary. The options are stored under follownig keys:
+test_params dictionary.
+
+NOTE: This procedure is applied to the videos. Every frame is converted
+to grayscale. In order to copute pairwise correlation matrix,
+set of cross correlations between signals needs to be obtained. A single
+signal is a frame parameter at specific location in the frame whcih
+varyies in time. The location and the method of frame parameter
+extraction are determined by the DISTRIBUTION.
+
+The options are stored under follownig keys:
     - The boolean flags:
         * do_clique_top - enables/disables persistent homology computations with
             Julia version of MATLAB clique-top lirbary
@@ -48,23 +57,28 @@ test_params dictionary. The options are stored under follownig keys:
 
 Also, named tuples are created:
     * DISTRIBUTION - contains the information about how the signal source form
-        a frame should be extracted; possible options are:
-        * uniform - pixels which are used as signal sources are distributed
-            uniformly accross the columns and rows of a frame;
-        * random - distance between following pixels in a row and column
-            are distributed randomly;
-        * patch - instead of extracting single pixel value from an image, an
-            average around it is extracted; the centers are distributed
-            uniformly accross a frame; the size of a patch is desribed by the
-            parameter stored in the test_params["sub_img_size_set"]
-        * local_corr - instead of extracting single pixel value from an image,
-            correlation of the subimage of size test_params["sub_img_size_set"]
-            and the subimage of same size, but shifted by the values from range
-            [-test_params["shift_set"]:test_params["shift_set"]] for each pixel
-            center; the size of a subimage is desribed by the parameter stored
-            in the test_params["sub_img_size_set"].
-        * local_grad - instead of extracting single pixel value from an image,
-            for each pixel center gradients of the subimages (size= test_params["sub_img_size_set"]) are taken;
+        a frame should be extracted;
+        Possible options are:
+        * uniform - pixel value is used as a parameter; pixels which are used
+            as signal sources are distributed uniformly accross the columns and
+            rows of a frame (thus they form a net spanned accross the frames in
+            which distance between nods are equal);
+        * random - pixel value is used as a parameter; distance between
+            following pixels in a row and column are distributed randomly
+            (created net has different distances between nods);
+        * patch - the parameter is an average around the location of the pixel;
+            the centers are distributed uniformly accross a frame; the size of
+            a patch is desribed by the parameter stored in the
+            test_params["sub_img_size_set"];
+        * local_corr - the parameter is correlation of the subimage of size
+            test_params["sub_img_size_set"] and the subimage of same size, but
+            shifted by the values from range
+            [-test_params["shift_set"]:test_params["shift_set"]] both for rows
+            and columns; the size of a subimage is desribed by the parameter
+            stored in the test_params["sub_img_size_set"].
+        * local_grad - the parameters is a sum fo absolute values of gradients
+            of the subimages (size= test_params["sub_img_size_set"]); the
+            centers of the subimages are distribute unifromly accross the frame.
 """
 
 using Dates
