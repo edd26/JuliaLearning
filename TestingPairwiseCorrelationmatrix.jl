@@ -40,6 +40,17 @@ function testing_pariwise_corr()
     plot_vectorized_video = test_params["plot_vectorized_video"]
     size_limiter = test_params["size_limiter"]
     ind_distrib = test_params["ind_distrib"]
+
+
+    videos_set = test_params["videos_set"]
+    tau_max_set = test_params["tau_max_set"]
+    points_per_dim_set = test_params["points_per_dim_set"]
+    shifts_set = test_params["shifts_set"]
+    patch_params = test_params["patch_params"]
+
+
+
+
     do_local_corr = false
     do_local_grad = false
 

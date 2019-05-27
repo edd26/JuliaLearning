@@ -1,8 +1,4 @@
-# using Plots
 using Dates
-
-# include("TestingPairwiseCorrelationmatrix.jl")
-
 
 VIDEO = (diag_1=1,
             diag_2=2,
@@ -21,6 +17,48 @@ DISTRIBUTION = (uniform="uniform",
                 patch="patch",
                 local_corr="local_corr",
                 local_grad="local_grad")
+
+
+test_params = Dict()
+test_params["do_clique_top"] = true
+test_params["do_eirene"] = false
+# test_params["choice"] = VIDEO.diag_gb
+test_params["save_figures"] = true
+test_params["plot_betti_figrues"] = true
+test_params["plot_vectorized_video"] = true
+test_params["tau_max"] = 25
+test_params["points_per_dim"] = 9
+test_params["size_limiter"] = 40
+test_params["use_testing_set"] = true
+test_params["video_name"] = videos_names[video_choice]
+test_params["ind_distrib"] = DISTRIBUTION.local_grad
+test_params["shift_set"] = [2 4]
+test_params["sub_img_size_set"] = [25 30]
+test_params["videos_set"] = collect(1:length(videos_names))
+test_params["tau_max_set"] = [50]
+test_params["points_per_dim_set"] = [9]
+test_params["shifts_set"] = [0]
+test_params["patch_params"] = Dict("x"=>1, "y"=>1, "spread" =>1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 video_choice = VIDEO.diag_1
 
@@ -50,35 +88,13 @@ cd(current_path)
 videos_names = readdir(video_path) # TODO The number of videos has to be controlled somehow
 
 # ---------------
-test_params = Dict()
-test_params["do_clique_top"] = true
-test_params["do_eirene"] = false
-# test_params["choice"] = VIDEO.diag_gb
-test_params["save_figures"] = true
-test_params["plot_betti_figrues"] = true
-test_params["plot_vectorized_video"] = true
-test_params["tau_max"] = 25
-test_params["points_per_dim"] = 9
-test_params["size_limiter"] = 40
-test_params["use_testing_set"] = true
-test_params["video_name"] = videos_names[video_choice]
-test_params["ind_distrib"] = DISTRIBUTION.local_grad
-test_params["shift_set"] = [2 4]
-test_params["sub_img_size_set"] = [25 30]
+
 
 #TODO saving and loading from multiple files with JSON package
 
 # videos_set = [video_choice]
 # tau_max_set = [test_params["tau_max"]]
 # points_per_dim_set = [test_params["points_per_dim"]]
-
-videos_set = collect(1:length(videos_names))
-tau_max_set = [50]
-points_per_dim_set = [9]
-shifts_set = [0]
-patch_params = Dict("x"=>1, "y"=>1, "spread" =>1)
-
-
 # TODO script for checking the dependencies (which may be stored in JSON file)
 # TODO Add script for removing empty folders
 # TODO add try-catch to the main manu which cathces dependency errors and then launches the script for dependency check
