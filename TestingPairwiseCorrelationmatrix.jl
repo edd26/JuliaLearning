@@ -47,6 +47,7 @@ function testing_pariwise_corr()
     patch_params = test_params["patch_params"]
     video_path = test_params["video_path"]
     results_path = test_params["results_path"]
+    videos = test_params["videos_names"]
 
 
     do_local_corr = false
