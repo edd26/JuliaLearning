@@ -4,3 +4,6 @@
 [submodule "clique-top"]
 	path = clique-top
 	url = https://github.com/nebneuron/clique-top.git
+[submodule "textureSynth"]
+	path = textureSynth
+	url = https://github.com/LabForComputationalVision/textureSynth.git
