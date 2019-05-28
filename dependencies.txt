@@ -1,6 +1,19 @@
 For MATLAB package:
 sudo apt-get install csh
 
+
+For texture generation:
+https://github.com/LabForComputationalVision/textureSynth.git
+
+The above requires this library:
+
+https://github.com/LabForComputationalVision/matlabPyrTools.git
+
+and add it as a tool box. Tutorial how to do that is here:
+
+https://uk.mathworks.com/help/matlab/matlab_env/what-is-the-matlab-search-path.html
+
+====================
 Packages for julia:
 
 DataFrames
