@@ -9,7 +9,7 @@ using Plots
  using ImageFiltering
  using ImageView
 
-
+using MATLAB
 
 # Load the image to replicate:
 choice = test_params["videos_names"][3]
