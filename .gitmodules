@@ -1,0 +1,3 @@
+[submodule "texture-synthesis-portilla-simoncelli"]
+	path = texture-synthesis-portilla-simoncelli
+	url = https://github.com/TetsuyaOdaka/texture-synthesis-portilla-simoncelli.git
