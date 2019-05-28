@@ -1,3 +1,6 @@
 [submodule "texture-synthesis-portilla-simoncelli"]
 	path = texture-synthesis-portilla-simoncelli
 	url = https://github.com/TetsuyaOdaka/texture-synthesis-portilla-simoncelli.git
+[submodule "clique-top"]
+	path = clique-top
+	url = https://github.com/nebneuron/clique-top.git
