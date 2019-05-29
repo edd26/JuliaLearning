@@ -7,7 +7,11 @@ In the file "dependencies.txt" all packages used across all of the scripts are l
 ```
 ]add PackageToInstall
 ```
-
+### Submodules
+Two submodules are used in this repository, those are clique-top and textureSynth. In order to download them use following command:
+```
+git submodule update --init --recursive
+```
 
 ## Usage
 In the repository there are few scripts which can be run as standalone scripts. Those are:
