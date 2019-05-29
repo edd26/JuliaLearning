@@ -28,7 +28,7 @@ mat"
 
 	% im0 is a double float matrix!
 	% im0 = double(imread('test_img.png'));
-	im0 = double(im)
+	im0 = double(im);
 
 
 	Nsc = 4; % Number of scales
@@ -49,3 +49,5 @@ mat"
 	showIm(im0, 'auto', 1, 'Original texture');
 	figure(2)
 	showIm(res, 'auto', 1, 'Synthesized texture');"
+
+mat"pwd()"
