@@ -67,14 +67,14 @@ betti_rand_0 = betticurve(rand_result_eirene, dim=0)
 
     title="Random matrix, Eirene"
     p_rand_e = plot(betti_rand_0[:,1], betti_rand_0[:,1], label="beta_0",
-                                                    title=title, xlims = (0,0.62));
+                                title=title, xlims = (0,0.62), legend=:topleft);
     plot!(betti_rand_1[:,1], betti_rand_1[:,2], label="beta_1");
     plot!(betti_rand_2[:,1], betti_rand_2[:,2], label="beta_2");
     plot!(betti_rand_3[:,1], betti_rand_3[:,2], label="beta_3");
 
     title="Geometric matrix, Eirene"
     p_geom_e = plot(betti_geom_1[:,1], betti_geom_1[:,1], label="beta_0",
-                                                    title=title, xlims = (0,0.62));
+                                title=title, xlims = (0,0.62), legend=:topleft);
     plot!(betti_geom_1[:,1], betti_geom_1[:,2], label="beta_1");
     plot!(betti_geom_2[:,1], betti_geom_2[:,2], label="beta_2");
     plot!(betti_geom_3[:,1], betti_geom_3[:,2], label="beta_3");
