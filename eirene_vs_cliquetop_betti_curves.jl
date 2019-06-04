@@ -81,19 +81,20 @@ betti_rand_0 = betticurve(rand_result_eirene, dim=0)
 
 # clique-top plotting
 title = "Random  matrix, clique-top"
-p_rand_ct = plot(edgeDensities_r, rand_betti_num[:,1], label="beta_0",
+p_rand_ct = plot(edgeDensities_r[:], rand_betti_num[:,1], label="beta_0",
                                                 title=title, legend=:topleft);
-plot!(edgeDensities_r, rand_betti_num[:,2], label="beta_1");
-plot!(edgeDensities_r, rand_betti_num[:,3], label="beta_2");
+plot!(edgeDensities_r[:], rand_betti_num[:,2], label="beta_1");
+plot!(edgeDensities_r[:], rand_betti_num[:,3], label="beta_2");
 
 title = "Geometric  matrix, clique-top"
-p_geom_ct = plot(edgeDensities_g, geom_betti_num[:,1], label="beta_0",
+p_geom_ct = plot(edgeDensities_g[:], geom_betti_num[:,1], label="beta_0",
                                                 title=title, legend=:topleft);
-plot!(edgeDensities_g, geom_betti_num[:,2], label="beta_1");
-plot!(edgeDensities_g, geom_betti_num[:,3], label="beta_2");
+plot!(edgeDensities_g[:], geom_betti_num[:,2], label="beta_1");
+plot!(edgeDensities_g[:], geom_betti_num[:,3], label="beta_2");
 
 # Comparison plot
 plot_ref1 = plot(p_rand_ct, p_rand_e, layout = (2,1))
 plot_ref2 = plot(p_geom_ct, p_geom_e, layout = (2,1))
 
-savefig(plot_ref, "results/comparison_random_matrix.png")
+# savefig(plot_ref, "results/comparison_random_matrix.png")
+#
