@@ -17,7 +17,7 @@ Return a matrix which stores the pariwise distances between every point in the
 @random_points matrix.
 """
 function generate_geometric_matrix(random_points)
-    geometric_matrix = pairwise(Euclidean(), random_points, dims=1)
+    geometric_matrix = pairwise(Euclidean(), random_points, dims=2)
     return geometric_matrix
 end
 
@@ -145,7 +145,7 @@ function plot_betti_numbers(betti_numbers, edge_density, title="Geometric  matri
 end
 
 """
-Saves given @matrix to the csv file with the name @filename. If there is no path 
+Saves given @matrix to the csv file with the name @filename. If there is no path
 added to the @filename, then file saved is in local folder.
 """
 function save_matrix_to_file(matrix, filename)
