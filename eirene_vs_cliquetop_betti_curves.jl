@@ -109,7 +109,10 @@ lim = 100;
 reduced = pointcloud[:, 1:lim]
 ezplot_pjs(reduced)
 pointcloud_distances = pairwise(Euclidean(), reduced, dims=2)
-
+matlab_file = "/Users/emil/Programowanie/MATLAB/distances.csv"
+open(matlab_file, "w") do io
+   writedlm(io, pointcloud_distances)
+end
 
 
 ezplot_pjs(pointcloud)
