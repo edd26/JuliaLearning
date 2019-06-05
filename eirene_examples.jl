@@ -18,16 +18,16 @@ x = rand(3,50)
 filepath = eirenefilepath("noisycircle")
 pointcloud = readdlm(filepath, ',', Float64, '\n')
 set_size = size(pointcloud)[2]
-lim = 90;
+lim = 300;
 reduced = pointcloud[:, Int.(floor.(range(1, stop=set_size, step = set_size/lim)))]
 
 ezplot_pjs(reduced)
 pointcloud_distances = pairwise(Euclidean(), reduced, dims=2)
-matlab_file = "/Users/emil/Programowanie/MATLAB/distances.csv"
+matlab_file = "../../MATLAB/distances.csv"
 open(matlab_file, "w") do io
     # for row in 1:lim
     #     for column in 1:100
-            writedlm(io, pointcloud_distances, ",")
+            writedlm(io, pointcloud_distances, ";")
 
 end
 
