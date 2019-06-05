@@ -3,6 +3,7 @@ using Plots
  using Eirene
  using Random
  using Distances
+ mat"addpath('clique-top')"
 
 include("clique_top_Julia/CliqueTop.jl")
 
@@ -10,7 +11,6 @@ include("clique_top_Julia/CliqueTop.jl")
 Random.seed!(1234)
     rand(1)
 
-    # generate random matrix for comparison
     matrix_size = 60
 
     # Generate symetric random matrix
@@ -38,21 +38,17 @@ Random.seed!(1234)
     geom_result_eirene = eirene(geometric_matrix,maxdim=3,model="vr")
 
 # clique-top computations
-mat"addpath('clique-top')"
+
 mat"[A, B, C, D] = compute_clique_topology($random_matrix, 'Algorithm', 'split');"
-mat"""$rand_betti_num = A;
- $edgeDensities_r = B;
- $persistenceIntervals = C;
- $unboundedIntervals = D;"""
-mat"[A, B, C, D] = compute_clique_topology($geometric_matrix, 'Algorithm', 'split');"
-mat"""$geom_betti_num = A;
- $edgeDensities_g = B;
- $persistenceIntervals = C;
- $unboundedIntervals = D;"""
-# ran_betti_num, edgeDensities_r, persistenceIntervals, unboundedIntervals =
-#                                         compute_clique_topology(random_matrix)
-# geo_betti_num, edgeDensities_g, persistenceIntervals, unboundedIntervals =
-#                                     compute_clique_topology(geometric_matrix)
+    mat"""$rand_betti_num = A;
+     $edgeDensities_r = B;
+     $persistenceIntervals = C;
+     $unboundedIntervals = D;"""
+    mat"[A, B, C, D] = compute_clique_topology($geometric_matrix, 'Algorithm', 'split');"
+    mat"""$geom_betti_num = A;
+     $edgeDensities_g = B;
+     $persistenceIntervals = C;
+     $unboundedIntervals = D;"""
 
 # Eirene plotting
 betti_rand_0 = betticurve(rand_result_eirene, dim=0)
@@ -81,20 +77,55 @@ betti_rand_0 = betticurve(rand_result_eirene, dim=0)
 
 # clique-top plotting
 title = "Random  matrix, clique-top"
-p_rand_ct = plot(edgeDensities_r[:], rand_betti_num[:,1], label="beta_0",
-                                                title=title, legend=:topleft);
-plot!(edgeDensities_r[:], rand_betti_num[:,2], label="beta_1");
-plot!(edgeDensities_r[:], rand_betti_num[:,3], label="beta_2");
+    p_rand_ct = plot(edgeDensities_r[:], rand_betti_num[:,1], label="beta_0",
+                                                    title=title, legend=:topleft);
+    plot!(edgeDensities_r[:], rand_betti_num[:,2], label="beta_1");
+    plot!(edgeDensities_r[:], rand_betti_num[:,3], label="beta_2");
 
-title = "Geometric  matrix, clique-top"
-p_geom_ct = plot(edgeDensities_g[:], geom_betti_num[:,1], label="beta_0",
-                                                title=title, legend=:topleft);
-plot!(edgeDensities_g[:], geom_betti_num[:,2], label="beta_1");
-plot!(edgeDensities_g[:], geom_betti_num[:,3], label="beta_2");
+    title = "Geometric  matrix, clique-top"
+    p_geom_ct = plot(edgeDensities_g[:], geom_betti_num[:,1], label="beta_0",
+                                                    title=title, legend=:topleft);
+    plot!(edgeDensities_g[:], geom_betti_num[:,2], label="beta_1");
+    plot!(edgeDensities_g[:], geom_betti_num[:,3], label="beta_2");
 
-# Comparison plot
-plot_ref1 = plot(p_rand_ct, p_rand_e, layout = (2,1))
-plot_ref2 = plot(p_geom_ct, p_geom_e, layout = (2,1))
+    # Comparison plot
+    plot_ref1 = plot(p_rand_ct, p_rand_e, layout = (2,1))
+    plot_ref2 = plot(p_geom_ct, p_geom_e, layout = (2,1))
 
 # savefig(plot_ref, "results/comparison_random_matrix.png")
-#
+
+x = rand(3,50)
+    C = eirene(x, model = "pc")
+    plotbarcode_pjs(C,dim=1)
+    plotpersistencediagram_pjs(C,dim=1)
+    plotclassrep_pjs(C,dim=1,class=1)
+    plotbetticurve_pjs(C, dim=1)
+
+using DelimitedFiles
+
+filepath = eirenefilepath("noisycircle")
+pointcloud = readdlm(filepath, ',', Float64, '\n')
+lim = 100;
+reduced = pointcloud[:, 1:lim]
+ezplot_pjs(reduced)
+pointcloud_distances = pairwise(Euclidean(), reduced, dims=2)
+
+
+
+ezplot_pjs(pointcloud)
+C = eirene(pointcloud, model = "pc")
+plotbetticurve_pjs(C, dim=1)
+
+mat"[A, B, C, D] = compute_clique_topology($pointcloud_distances, 'Algorithm', 'split');"
+mat"""$cloud_betti_num = A;
+ $edgeDensities_c = B;
+ $persistenceIntervals = C;
+ $unboundedIntervals = D;"""
+
+
+# clique-top plotting
+title = "Cloud  matrix, clique-top"
+p_rand_ct = plot(edgeDensities_c[:], cloud_betti_num[:,1], label="beta_0",
+                                             title=title, legend=:topleft);
+plot!(edgeDensities_c[:], cloud_betti_num[:,2], label="beta_1");
+plot!(edgeDensities_c[:], cloud_betti_num[:,3], label="beta_2")
