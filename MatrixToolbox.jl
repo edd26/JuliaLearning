@@ -4,6 +4,16 @@ using Random
 using LightGraphs
 using GraphPlot
 
+export generate_random_point_cloud,
+        generate_geometric_matrix,
+        generate_shuffled_matrix,
+        generate_random_matrix,
+        generate_matrix_ordering,
+        generate_set_of_graphs,
+        plot_betti_numbers,
+        save_matrix_to_file
+
+
 """
 Returns a random matrix of size @number_of_points x @dimensions in which every
 column is a point and every n-th row is a position in the n-th dimension.
@@ -108,7 +118,7 @@ graph, single connection between points is added.
 
 NOTE: the function does not take the coordinates of the numbered vertices.
 """
-function generate_set_of_graphs(matrix_size, matrix_ordering)
+    function generate_set_of_graphs(matrix_size, matrix_ordering)
     vetrices = matrix_size
     edges = matrix_ordering
     num_of_edges = size(edges)[2]
