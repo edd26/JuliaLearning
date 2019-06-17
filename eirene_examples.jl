@@ -15,15 +15,15 @@ x = rand(3,50)
 
 
 
-filepath = eirenefilepath("noisycircle")
+filepath = eirenefilepath("noisytorus")
 pointcloud = readdlm(filepath, ',', Float64, '\n')
 set_size = size(pointcloud)[2]
-lim = 300;
+lim = 500;
 reduced = pointcloud[:, Int.(floor.(range(1, stop=set_size, step = set_size/lim)))]
 
 ezplot_pjs(reduced)
 pointcloud_distances = pairwise(Euclidean(), reduced, dims=2)
-matlab_file = "../../MATLAB/distances.csv"
+matlab_file = "../../Python/distances.csv"
 open(matlab_file, "w") do io
     # for row in 1:lim
     #     for column in 1:100
@@ -31,8 +31,9 @@ open(matlab_file, "w") do io
 
 end
 
-C = eirene(reduced, model = "pc")
-plotbetticurve_pjs(C, dim=1)
+C = eirene(reduced, model = "pc", maxdim=2)
+plotbetticurve_pjs(C, dim=2)
+plotpersistencediagram_pjs(C, dim=1)
 
 mat"[A, B, C, D] = compute_clique_topology($pointcloud_distances, 'Algorithm', 'split');"
 mat"""$cloud_betti_num = A;
