@@ -9,14 +9,32 @@ import VideoIO
  # using Makie
  using Logging
 
+export get_video_array_from_file,
+        get_video_dimension,
+        get_video_mask,
+        extract_pixels_from_video,
+        extract_pixels_from_video,
+        vectorize_video,
+        get_pairwise_correlation_matrix,
+        get_average_from_tiles,
+        rotate_img_around_center,
+        rotate_vid_around_center,
+        export_images_to_vid,
+        rotate_and_save_video,
+        get_local_correlations,
+        get_local_centers,
+        get_local_gradients,
+        normalize_to_01,
+        shift_to_non_negative,
+        plotimg;
 
- """
-     get_video_array_from_file(video_name)
+"""
+ get_video_array_from_file(video_name)
 
- Returns array to which video frames are copied. Frames are in grayscale.
+Returns array to which video frames are copied. Frames are in grayscale.
 
- Function opens stream, then loads the file and gets all the frames from a
- video.
+Function opens stream, then loads the file and gets all the frames from a
+video.
  """
 function get_video_array_from_file(video_name)
    video_streamer = VideoIO.open(video_name) # candle
@@ -300,7 +318,7 @@ end
 
 
 """
-    export_images_to_exist_vid(video_array, dest_file)
+    export_images_to_vid(video_array, dest_file)
 
 Exports set of images stored in @video_array to the dest_file.
 

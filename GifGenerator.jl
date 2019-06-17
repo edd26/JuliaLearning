@@ -1,5 +1,10 @@
 using Luxor, Colors, FileIO
 
+export generate_gif,
+        dotted_plane,
+        backdrop,
+        load_gif_to_array;
+
 """
 Generate a gif at @full_path using the function @frame_function. Image size and
  length sotred in the tuple @gif_dims.
