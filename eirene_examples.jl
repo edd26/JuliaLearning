@@ -15,10 +15,11 @@ x = rand(3,50)
 
 
 
+filepath = eirenefilepath("noisycircle")
 filepath = eirenefilepath("noisytorus")
 pointcloud = readdlm(filepath, ',', Float64, '\n')
 set_size = size(pointcloud)[2]
-lim = 500;
+lim = 1800;
 reduced = pointcloud[:, Int.(floor.(range(1, stop=set_size, step = set_size/lim)))]
 
 ezplot_pjs(reduced)
@@ -32,10 +33,11 @@ open(matlab_file, "w") do io
 end
 
 C = eirene(reduced, model = "pc", maxdim=2)
-plotbetticurve_pjs(C, dim=2)
+plotbetticurve_pjs(C, dim=1)
 plotpersistencediagram_pjs(C, dim=1)
+plotbarcode_pjs(C, dim=0:2)
 
-mat"[A, B, C, D] = compute_clique_topology($pointcloud_distances, 'Algorithm', 'split');"
+mat"[A, B, C, D] = compute_clique_topology($pointcloud_distances, 'Algorithm', 'split');"~
 mat"""$cloud_betti_num = A;
  $edgeDensities_c = B;
  $persistenceIntervals = C;
