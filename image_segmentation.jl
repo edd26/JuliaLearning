@@ -9,7 +9,7 @@ using Images, ImageView
 plot_img = false
 
 
-img = Gray.(load("img/checkerboard.png"))
+img = Gray.(load("img/brickwall2.jpg"))
    plot_img ? imshow(img) : ()
 imgg = imfilter(img, Kernel.gaussian(1));
    plot_img ? imshow(imgg) : ()
@@ -70,7 +70,6 @@ end
 
 my_maxdim = 2
 
-
 distance_matrix = pairwise(Euclidean(), data_matrix, dims=2)
 distance_matrix ./= findmax(distance_matrix)[1]
 
@@ -85,7 +84,7 @@ mat"""addpath('clique-top')
       B = 0;
       C = 0;
       D = 0;
-      [A, B, C, D] = compute_clique_topology($distance_matrix, 'Algorithm', 'split', 'MaxEdgeDensity', 0.6);
+      [A, B, C, D] = compute_clique_topology($distance_matrix(1:60, 1:60), 'Algorithm', 'split', 'MaxEdgeDensity', 0.6);
       $betti_num = A;
       $edgeDensities_r = B;
       $persistenceIntervals = C;
@@ -93,37 +92,6 @@ mat"""addpath('clique-top')
 
 plot(edgeDensities_r', betti_num)
 
-
-
-## Random matrix for comparison
-Random.seed!(1234)
-    rand(1)
-
-    matrix_size = 46
-
-    # Generate symetric random matrix
-    elemnts_above_diagonal = Int((matrix_size^2-matrix_size)/2)
-    random_matrix = zeros(matrix_size, matrix_size)
-    set_of_random_numbers = rand(elemnts_above_diagonal)
-    h = 1
-    for k in 1:matrix_size
-        for m in k+1:matrix_size
-            random_matrix[k,m] = set_of_random_numbers[h]
-            random_matrix[m,k] = set_of_random_numbers[h]
-            global h += 1
-        end
-    end
-
-   rand_betti_num = 0
-   edgeDensities_r = 0;
-   persistenceIntervals = 0;
-   unboundedIntervals = 0;
-   mat"[A, B, C, D] = compute_clique_topology($random_matrix, 'Algorithm', 'split');"
-       mat"""$rand_betti_num = A;
-        $edgeDensities_r = B;
-        $persistenceIntervals = C;
-        $unboundedIntervals = D;"""
-   plot(edgeDensities_r', rand_betti_num)
 
 
 # Plotting
