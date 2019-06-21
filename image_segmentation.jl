@@ -3,26 +3,23 @@ using Images, ImageView
    using Random
    using Plots
    using Statistics
+   using MATLAB
+   using Distances
 
-   include("VideoProcessing.jl")
-
+plot_img = false
 
 
 img = Gray.(load("img/checkerboard.png"))
-imshow(img)
-
+   plot_img ? imshow(img) : ()
 imgg = imfilter(img, Kernel.gaussian(1));
-imshow(imgg)
-
-# segments = unseeded_region_growing(imgg, 0.08)
-#     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
-
+   plot_img ? imshow(imgg) : ()
 
 # Method below takes a lot of time time but returns multiple segments
 segments = meanshift(imgg, 16, 10/255)
  # parameters are smoothing radii: spatial=16, intensity-wise=8/255
-    imshow(map(i->segment_mean(segments,i), labels_map(segments)))
-#
+    plot_img ? imshow(map(i->segment_mean(segments,i), labels_map(segments))) : ()
+
+include("VideoProcessing.jl")
 
 # Get the center of the segments
 seg_pix_count = segment_pixel_count(segments)
@@ -30,7 +27,9 @@ seg_map = labels_map(segments)
 size_threshold = 50
 regions_count = size(segment_labels(segments))[1]
 seg_centers = zeros(Float64, 3, regions_count)
+seg_data = Dict()
 seg_mean = segment_mean(segments)
+
 
 for segment in segment_labels(segments)
    if seg_pix_count[segment] > size_threshold
@@ -42,8 +41,13 @@ for segment in segment_labels(segments)
          center_x += index_set[k][1]
          center_y += index_set[k][2]
       end
-      seg_centers[1:2,segment] = Int.(floor.([center_x;center_y]./indicies))
+      center = Float64.(floor.([center_x;center_y]./indicies))
+      seg_centers[1:2,segment] = center
       seg_centers[3,segment] = seg_mean[segment]
+
+      seg_var = var(img[index_set])
+      seg_std = std(img[index_set])
+      seg_data[segment] = vcat(center, seg_mean[segment], seg_pix_count[segment], seg_var, seg_std)
    end
 end
 
@@ -53,27 +57,74 @@ for center = 1:regions_count
    end
 end
 
-## Eirene Test
-using Eirene
+# create array from dictionary
+data_matrix = zeros(6, length(seg_data))
+
+counter = 1
+for element in seg_data
+   data_matrix[:,counter] = element[2][:]
+   global counter +=1
+end
+
+## Topology test
 
 my_maxdim = 2
 
-segments_eirene = eirene(seg_centers, model="pc", maxdim=my_maxdim)
-segments_eirene = betticurve(geom_eirene, dim=1)
- segments_betti = zeros(size(segments_eirene)[1], 3+1)
- segments_betti[:,1] = segments_eirene[:,1]
- for k in 1:3
-     segments_betti[:,k+1] = betticurve(geom_eirene, dim=k)[:,2]
- end
- matrix = segments_betti
- maxy = findmax(matrix[:,2])[2]
- plot(matrix[:,1], matrix[:,2], label="Random matrix, dim=1", ylims = (0,maxy))
- plot!(matrix[:,1], matrix[:,3], label="Random matrix, dim=2")
- plot!(matrix[:,1], matrix[:,4], label="Random matrix, dim=3")
+
+distance_matrix = pairwise(Euclidean(), data_matrix, dims=2)
+distance_matrix ./= findmax(distance_matrix)[1]
+
+
+# clique-top computations
+betti_num = 0
+edgeDensities_r = 0;
+persistenceIntervals = 0;
+unboundedIntervals = 0;
+mat"""addpath('clique-top')
+      A = 0;
+      B = 0;
+      C = 0;
+      D = 0;
+      [A, B, C, D] = compute_clique_topology($distance_matrix, 'Algorithm', 'split', 'MaxEdgeDensity', 0.6);
+      $betti_num = A;
+      $edgeDensities_r = B;
+      $persistenceIntervals = C;
+      $unboundedIntervals = D;"""
+
+plot(edgeDensities_r', betti_num)
 
 
 
-##
+## Random matrix for comparison
+Random.seed!(1234)
+    rand(1)
+
+    matrix_size = 46
+
+    # Generate symetric random matrix
+    elemnts_above_diagonal = Int((matrix_size^2-matrix_size)/2)
+    random_matrix = zeros(matrix_size, matrix_size)
+    set_of_random_numbers = rand(elemnts_above_diagonal)
+    h = 1
+    for k in 1:matrix_size
+        for m in k+1:matrix_size
+            random_matrix[k,m] = set_of_random_numbers[h]
+            random_matrix[m,k] = set_of_random_numbers[h]
+            global h += 1
+        end
+    end
+
+   rand_betti_num = 0
+   edgeDensities_r = 0;
+   persistenceIntervals = 0;
+   unboundedIntervals = 0;
+   mat"[A, B, C, D] = compute_clique_topology($random_matrix, 'Algorithm', 'split');"
+       mat"""$rand_betti_num = A;
+        $edgeDensities_r = B;
+        $persistenceIntervals = C;
+        $unboundedIntervals = D;"""
+   plot(edgeDensities_r', rand_betti_num)
+
 
 # Plotting
 plotimg(labels_map(segments))
