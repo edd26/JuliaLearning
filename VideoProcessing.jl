@@ -532,7 +532,7 @@ end
 Display an image as a plot. The values from the input matrix are adjusted to the
 value range of [0, 1].
 
-I @cut_off is true then the matrix values above 256 are set to 256 and then all
+If @cut_off is true then the matrix values above 256 are set to 256 and then all
 values are normalized to the value 256. If @cut_off is false, then values are
 normalized to maximal value.
 """
