@@ -3,7 +3,7 @@ using Plots
 
 include("VideoProcessing.jl")
 
-img = testimage("lighthouse")
+img = load("img/RT6_6.png")
 img1 = Gray.(img)
 rot = recenter(RotMatrix(5pi/6), [size(img1)...] .÷ 2)  # a rotation around the center
 tform = rot ∘ Translation(-50, -40)
