@@ -56,37 +56,30 @@ print("Type of matrix element: {}".format(type(matrix[1])))
 print("Matrix element value: {}".format((matrix[0])))
 
 # ---
+# Load geometric matrix containing distances and remove diagonal and the values
+# above it
 
 with open('distances.csv', 'r') as f:
     reader = csv.reader(f)
     your_list = list(reader)
 
-print("Type of your_list: {}".format(type(your_list)))
-
-print("Type of your_list element: {}".format(type(your_list[1])))
-
-print("your_list element value: {}".format((your_list[0])))
-
-results = list(map(float, your_list[0]))
-print("your_list mapped element value: {}".format(results ))
-
-
 counter = 0
-size = len(your_list.count)
-
-print("your_list mapped element value: {}".format(results ))
+size = len(your_list)
 
 for element in your_list:
-    print(list(map(float, element)))
+    # print(type(element))
+    for k in range(size-1, counter-1, -1):
+        element.pop(k)
+        # print("After {}: {}".format(k, element))
 
-# your_list = map(int, your_list)
-# print(your_list)
-# matrix = your_list
+    your_list[counter] = list(map(float, element))
+    counter +=1
+
 
 
 # ---
 
-rips_complex = gudhi.RipsComplex(distance_matrix=matrix,
+rips_complex = gudhi.RipsComplex(distance_matrix=your_list,
                                  max_edge_length=12.0)
 
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
