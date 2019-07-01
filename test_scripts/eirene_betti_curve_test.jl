@@ -26,10 +26,11 @@ dimensions = 20
 
 # Save Matricies to csv files
 if save
-    writedlm( "distances.csv",  geometric_matrix, ',')
+    writedlm( "geometric_matrix.csv",  geometric_matrix, ',')
     writedlm( "shuffeled_matrix.csv",  shuffeled_matrix, ',')
     writedlm( "random_matrix.csv",  random_matrix, ',')
 end
+
 
 ## Compute topoplogies of matricies
 my_maxdim = 3
