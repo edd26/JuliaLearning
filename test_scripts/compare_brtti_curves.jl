@@ -24,6 +24,12 @@ dimensions = 20
  shuffeled_matrix = generate_shuffled_matrix(geometric_matrix)
  random_matrix = generate_random_matrix(N)
 
+filepath = eirenefilepath("noisycircle")
+circle_cloud = readdlm(filepath, ',', Float64, '\n')
+
+filepath = eirenefilepath("noisytorus")
+torus_cloud = readdlm(filepath, ',', Float64, '\n')
+
 # Save Matricies to csv files
 if save
     writedlm( "geometric_matrix.csv",  geometric_matrix, ',')
@@ -31,15 +37,17 @@ if save
     writedlm( "random_matrix.csv",  random_matrix, ',')
 end
 
-
 ## Compute topoplogies of matricies
 my_maxdim = 3
-ending = 40
+# ending = 40
 
 geom_eirene = eirene(geometric_matrix, model="vr", maxdim=my_maxdim)
  shuffled_eirene = eirene(shuffeled_matrix, model="vr", maxdim=my_maxdim)
- random_eirene= eirene(random_matrix[1:ending, 1:ending], model="vr", maxdim=my_maxdim)
+ random_eirene= eirene(random_matrix, model="vr", maxdim=my_maxdim)
+ # random_eirene= eirene(random_matrix[1:ending, 1:ending], model="vr", maxdim=my_maxdim)
 
+circle_eirene = eirene(circle_cloud, model="pc", maxdim=my_maxdim)
+torus_eirene = eirene(torus_cloud, model="pc", maxdim=my_maxdim)
 # Get the betti curves f
 dimen = 1
 
@@ -67,6 +75,23 @@ random_betti1 = betticurve(random_eirene, dim=1)
  for k in 1:3
      random_betti[:,k+1] = betticurve(random_eirene, dim=k)[:,2]
  end
+
+# Circle
+circle_betti1 = betticurve(circle_eirene, dim=1)
+ circle_betti = zeros(size(circle_betti1)[1], 3+1)
+ circle_betti[:,1] = circle_betti1[:,1]
+ for k in 1:3
+   circle_betti[:,k+1] = betticurve(circle_eirene, dim=k)[:,2]
+ end
+
+# Torus
+torus_betti1 = betticurve(torus_eirene, dim=1)
+ torus_betti = zeros(size(torus_betti1)[1], 3+1)
+ torus_betti[:,1] = torus_betti1[:,1]
+ for k in 1:3
+     torus_betti[:,k+1] = betticurve(torus_eirene, dim=k)[:,2]
+ end
+
 # %%
 matrix = random_betti
  maxy = findmax(matrix[:,2])[2]
@@ -79,8 +104,18 @@ matrix = shuffled_betti
  plot!(matrix[:,1], matrix[:,3], label="Shuffled matrix, dim=2")
  plot!(matrix[:,1], matrix[:,4], label="Shuffled matrix, dim=3")
  # %%
-matrix = geom_betti
+matrix = circle_betti
  plot(matrix[:,1], matrix[:,2], label="Geometric matrix, dim=1", ylims = (0,maxy))
+ plot!(matrix[:,1], matrix[:,3], label="Geometric matrix, dim=2")
+ plot!(matrix[:,1], matrix[:,4], label="Geometric matrix, dim=3")
+
+matrix = torus_betti
+ plot(matrix[:,1], matrix[:,2], label="Circle cloud, dim=1", ylims = (0,maxy))
+ plot!(matrix[:,1], matrix[:,3], label="Geometric matrix, dim=2")
+ plot!(matrix[:,1], matrix[:,4], label="Geometric matrix, dim=3")
+
+matrix = geom_betti
+ plot(matrix[:,1], matrix[:,2], label="Torus cloud, dim=1", ylims = (0,maxy))
  plot!(matrix[:,1], matrix[:,3], label="Geometric matrix, dim=2")
  plot!(matrix[:,1], matrix[:,4], label="Geometric matrix, dim=3")
 
