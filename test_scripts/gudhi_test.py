@@ -62,11 +62,12 @@ print("Matrix element value: {}".format((matrix[0])))
 # Removing values is notnecessary, as the Rips complex creator supports full
 # distance matrix.
 
-with open('distances.csv', 'r') as f:
+# with open('torus.csv', 'r') as f:
+with open('circle.csv', 'r') as f:
+# with open('distances.csv', 'r') as f:
     reader = csv.reader(f)
     your_list = list(reader)
 
-distances = copy.deepcopy(your_list)
 counter = 0
 size = len(your_list)
 
@@ -80,26 +81,25 @@ for element in your_list:
     counter +=1
 
 counter = 0
-for element in distances:
-    distances[counter] = list(map(float, element))
-    counter +=1
+
+# ----
+# load noisycircle for testing purposes
+
 
 # ---
-rips_complex = gudhi.RipsComplex(distance_matrix=distances)
-rips_complex2 = gudhi.RipsComplex(distance_matrix=your_list,
+rips_complex = gudhi.RipsComplex(distance_matrix=your_list,
                                  max_edge_length=20.0)
 
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
-simplex_tree2 = rips_complex2.create_simplex_tree(max_dimension=3)
 
+persistance_elements = simplex_tree.persistence()
+simplex_tree.persistence_intervals_in_dimension(3)
+simplex_tree.persistence_pairs()
 
-simplex_tree.persistence(min_persistence=-1)
 simplex_tree.betti_numbers()
-
-simplex_tree2.persistence()
-simplex_tree2.betti_numbers()
-
-
+simplex_tree.persistent_betti_numbers(from_value=1, to_value=0)
+simplex_tree.write_persistence_diagram("diagram.txt")
+simplex_tree.num_simplices()
 
 
 
