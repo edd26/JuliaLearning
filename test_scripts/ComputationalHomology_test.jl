@@ -1,4 +1,3 @@
-
 using ComputationalHomology
     using Distances
     using DataFrames
@@ -6,18 +5,41 @@ using ComputationalHomology
     using DelimitedFiles
 
 include("../MatrixToolbox.jl")
+#= ############################################################################
+    Example from library
+=#
 
+X = rand(3,10); # generate dataset
+cplx, w = vietorisrips(X, 0.4, true) # generate Vietoris-Rips (VR) complex
+flt = filtration(cplx, w) # construct filtration complex from VR complex
+
+# following version does not work:
+ # ph = persistenthomology(flt, TwistReduction)
+
+# create persistent homology object with specific computation method
+ph = persistenthomology(flt)
+
+group(ph, 0) # calculate 0-homology group
+group(ph, 1) # calculate 1-homology group
+#= ############################################################################
+    Own tests
+
+    It is working, but is working very slow
+=#
 N = 88
 dimensions = 5
 
+Random.seed!(1234)
+
 random_points = generate_random_point_cloud(N, dimensions)
 geometric_matrix = generate_geometric_matrix(random_points)
-matrix_ordering =  generate_matrix_ordering(geometric_matrix, N)
+matrix_ordering =  generate_matrix_ordering(geometric_matrix)
 set_of_graphs, edge_density = generate_set_of_graphs(N, matrix_ordering)
 geometric_matrix = -geometric_matrix
 
 # %% markdown
-# # At his point, input matrix is assumed to be settled (either random, geometric or correaltion)
+# # At his point, input matrix is assumed to be settled (either random,
+# geometric or correaltion)
 # Now Betti curves should be obtained by:
 # 0. Creae set of graphs
 # 1. Compute simplicial homology groups of the taken (i+1)-clique
@@ -25,10 +47,6 @@ geometric_matrix = -geometric_matrix
 # 3. Compute Betti number (used later as ordinate)
 # %%
 
-
-
-# max_distance = findmax(geometric_matrix)
-# max_distance = -max_distance[1]
 
 # function do_filtration(m)
 points_filtration = zeros(Int, N)
