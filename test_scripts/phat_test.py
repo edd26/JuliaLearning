@@ -1,5 +1,8 @@
 import phat
 
+
+# ********************************************************************************************************************
+# Example code
 # define a boundary matrix with the chosen internal representation
 boundary_matrix = phat.boundary_matrix(representation = phat.representations.vector_vector)
 
