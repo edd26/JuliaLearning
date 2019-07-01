@@ -3,6 +3,7 @@ using ComputationalHomology
     using DataFrames
     using Random
     using DelimitedFiles
+    using Plots
 
 include("../MatrixToolbox.jl")
 #= ############################################################################
@@ -26,7 +27,7 @@ group(ph, 1) # calculate 1-homology group
 
     It is working, but is working very slow
 =#
-N = 88
+N = 100
 dimensions = 5
 
 Random.seed!(1234)
@@ -35,7 +36,7 @@ random_points = generate_random_point_cloud(N, dimensions)
 geometric_matrix = generate_geometric_matrix(random_points)
 matrix_ordering =  generate_matrix_ordering(geometric_matrix)
 set_of_graphs, edge_density = generate_set_of_graphs(N, matrix_ordering)
-geometric_matrix = -geometric_matrix
+# geometric_matrix = -geometric_matrix
 
 # %% markdown
 # # At his point, input matrix is assumed to be settled (either random,
@@ -51,9 +52,9 @@ geometric_matrix = -geometric_matrix
 # function do_filtration(m)
 points_filtration = zeros(Int, N)
     betti_number = zeros(3, size(matrix_ordering)[2])
+    ordering_size = size(matrix_ordering)[2]
 
-m=size(matrix_ordering)[2]
-for k=1:Int(floor(m/5))
+for k=1:Int(floor(ordering_size/20)):ordering_size
     points_filtration[matrix_ordering[1,k]] += 1
     points_filtration[matrix_ordering[2,k]] += 1
 
@@ -61,29 +62,25 @@ for k=1:Int(floor(m/5))
     subset_of_points = random_points[:,mask]
 
     max_distance = geometric_matrix[matrix_ordering[1,k], matrix_ordering[2,k]]
-# println(subset_of_points)
+
     cplx, w = vietorisrips(subset_of_points, max_distance, true) # generate Vietoris-Rips (VR) complex
-    # println(cplx)
     flt = filtration(cplx, w) # construct filtration complex from VR complex
     ph = persistenthomology(flt) # create persistent homology object with specific computation method
 
+    try
+        for d in 0:2
+            betti_number[d+1, k] = group(ph, d)
+        end
+    catch error
 
-# d = 2
-# if size(cplx)[2] <= 2
-    for d in 0:1
-        betti_number[d+1, k] = group(ph, d)
     end
 
-    if mod(k,10)==0
+    if mod(k,10)==1
         println(k)
     end
-# else
-#     for d in 0:2
-#         betti_number[d+1, k] = group(ph, d)
-#     end
 end
-# end
-#     println("finished")
-# end
-using Plots
-plot(edge_density, betti_number[2,:])
+
+
+plot(edge_density, betti_number[1,:]);
+ plot!(edge_density, betti_number[2,:]);
+ plot!(edge_density, betti_number[3,:])
