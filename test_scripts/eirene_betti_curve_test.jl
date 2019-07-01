@@ -18,7 +18,7 @@ save = false
 # collection of points embedded in some Euclidean space ->  negative distance matrix -> geometric order complex
 # Each column is a point, each row n is coordinate in the n-th dimension
 dimensions = 20
- N = 5
+ N = 60
  random_points = generate_random_point_cloud(N, dimensions)
  geometric_matrix = generate_geometric_matrix(random_points)
  shuffeled_matrix = generate_shuffled_matrix(geometric_matrix)
