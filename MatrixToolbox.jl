@@ -120,7 +120,7 @@ graph, single connection between points is added.
 
 NOTE: the function does not take the coordinates of the numbered vertices.
 """
-    function generate_set_of_graphs(matrix_size, matrix_ordering)
+function generate_set_of_graphs(matrix_size, matrix_ordering)
     vetrices = matrix_size
     edges = matrix_ordering
     num_of_edges = size(edges)[2]
