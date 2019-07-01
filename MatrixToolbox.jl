@@ -92,6 +92,8 @@ function generate_matrix_ordering(geometric_matrix, ascending = true)
 
     A = copy(geometric_matrix)
 
+    (ascending) ? (method=findmax) : (method=findmin)
+
     for element in 1:elemnts_above_diagonal
     #     Find maximal distance
         minimal_value = method(A)
