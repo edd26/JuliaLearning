@@ -9,7 +9,7 @@ using Images, ImageView
 plot_img = false
 
 
-img = Gray.(load("img/brickwall2.jpg"))
+img = Gray.(load("img/checkerboard.png"))
    plot_img ? imshow(img) : ()
 imgg = imfilter(img, Kernel.gaussian(1));
    plot_img ? imshow(imgg) : ()
@@ -95,7 +95,7 @@ plot(edgeDensities_r', betti_num)
 
 
 # Plotting
-plotimg(labels_map(segments))
+an_image = plotimg(labels_map(segments))
 
-
+save("segmented_checkerboard.jpg", an_image)
 plot(seg_centers[3,:])
