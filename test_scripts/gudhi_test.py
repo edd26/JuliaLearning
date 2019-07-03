@@ -80,8 +80,6 @@ for element in your_list:
     your_list[counter] = list(map(float, element))
     counter +=1
 
-counter = 0
-
 # ----
 # load noisycircle for testing purposes
 
@@ -91,6 +89,7 @@ rips_complex = gudhi.RipsComplex(distance_matrix=your_list,
                                  max_edge_length=20.0)
 
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
+simplex_tree = rips_complex.create_simplex_tree(max_dimension=2)
 
 persistance_elements = simplex_tree.persistence()
 simplex_tree.persistence_intervals_in_dimension(3)
