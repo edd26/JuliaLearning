@@ -12,9 +12,11 @@ seeds = [(CartesianIndex(126,81),1), (CartesianIndex(93,255),2), (CartesianIndex
     segments = seeded_region_growing(img, seeds)
     segment_mean(segments)
     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
+    save("segment_mean.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
 
 segments = felzenszwalb(img, 100)
     imshow(map(i->segment_mean(segments,i), labels_map(segments)))
+    save("felzenszwalb.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
 
 segments = felzenszwalb(img, 15, 20)
     function get_random_color(seed)
@@ -22,13 +24,19 @@ segments = felzenszwalb(img, 15, 20)
         rand(RGB{N0f8})
     end
     imshow(map(i->get_random_color(i), labels_map(segments)))
+    save("felzenszwalb2.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+
 
 
 segments = unseeded_region_growing(img, 0.08)
     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
+    save("unseeded_region_growing.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+
 segments = meanshift(img, 20, 15/255)
  # parameters are smoothing radii: spatial=16, intensity-wise=8/255
     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
+    save("meanshift.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+
 
 imgg = imfilter(img, Kernel.gaussian(3));
 segments = unseeded_region_growing(imgg, 0.08)
