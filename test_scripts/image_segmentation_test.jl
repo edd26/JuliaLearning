@@ -24,13 +24,14 @@ segments = felzenszwalb(img, 15, 20)
         rand(RGB{N0f8})
     end
     imshow(map(i->get_random_color(i), labels_map(segments)))
-    save("felzenszwalb2.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+    save("felzenszwalb2.jpg", map(i->get_random_color(i), labels_map(segments)))
 
 
 
 segments = unseeded_region_growing(img, 0.08)
     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
     save("unseeded_region_growing.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+    save("unseeded_region_growing_col.jpg", map(i->get_random_color(i), labels_map(segments)))
 
 segments = meanshift(img, 20, 15/255)
  # parameters are smoothing radii: spatial=16, intensity-wise=8/255
@@ -41,10 +42,14 @@ segments = meanshift(img, 20, 15/255)
 imgg = imfilter(img, Kernel.gaussian(3));
 segments = unseeded_region_growing(imgg, 0.08)
     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
+    save("gauss_fil_unseeded_region_growing.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+
 
 segments = meanshift(imgg, 20, 15/255)
  # parameters are smoothing radii: spatial=16, intensity-wise=8/255
     imshow(map(i->segment_mean(segments,i), labels_map(segments)))
+    save("meanshift_col.jpg", map(i->segment_mean(segments,i), labels_map(segments)))
+
 
 
 # Using FFT method creates artifacts, which may be hatmful for the segmentation
