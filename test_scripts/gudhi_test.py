@@ -63,7 +63,7 @@ print("Matrix element value: {}".format((matrix[0])))
 # distance matrix.
 
 # with open('torus.csv', 'r') as f:
-with open('../data/circle.csv', 'r') as f:
+with open('data/circle.csv', 'r') as f:
 # with open('distances.csv', 'r') as f:
     reader = csv.reader(f)
     your_list = list(reader)
