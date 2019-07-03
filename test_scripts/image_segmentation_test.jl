@@ -5,8 +5,8 @@ using FFTW, Plots
 
 using Clustering
 
-img = Gray.(load("../img/checkerboard.png"))
-imshow(img)
+img = Gray.(load("img/checkerboard.png"))
+# imshow(img)
 
 seeds = [(CartesianIndex(126,81),1), (CartesianIndex(93,255),2), (CartesianIndex(213,97),3)]
     segments = seeded_region_growing(img, seeds)
@@ -14,7 +14,7 @@ seeds = [(CartesianIndex(126,81),1), (CartesianIndex(93,255),2), (CartesianIndex
     imshow(map(i->segment_mean(segments,i), labels_map(segments)));
 
 segments = felzenszwalb(img, 100)
-    imshow(map(i->segment_mean(segments,i), labels_map(segments)));
+    imshow(map(i->segment_mean(segments,i), labels_map(segments)))
 
 segments = felzenszwalb(img, 15, 20)
     function get_random_color(seed)
