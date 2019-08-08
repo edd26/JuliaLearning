@@ -15,15 +15,19 @@ plot(random_matrix[1,:], random_matrix[2,:],seriestype=:scatter,title="random_ma
 
 
 my_matrix = random_matrix
+my_center = (x=0, y=0)
+my_radius = 2
+my_limits = (xlim = (my_center.x-my_radius, my_center.x+my_radius),
+                ylim = (my_center.y-my_radius, my_center.y+my_radius))
 
-#=
-This functin is not generating uniform distribution, as the elements outside the
-radius are mapped to the values near the border of the radius, as they are
-distributed for a smaller field.
+    #=
+    This functin is not generating uniform distribution, as the elements outside the
+    radius are mapped to the values near the border of the radius, as they are
+    distributed for a smaller field.
 
-In other words, the distribution from outside the radius are mapped to the
-border values of the circle. 
-=#
+    In other words, the distribution from outside the radius are mapped to the
+    border values of the circle.
+    =#
 function restric_to_circle(my_matrix; center=(x=0, y=0), radius = 1)
     cloud = copy(my_matrix)
     # Add handing input matrix from range different from [-1,1]
@@ -32,16 +36,12 @@ function restric_to_circle(my_matrix; center=(x=0, y=0), radius = 1)
     radius_sq = radius^2
 
     for point = 1:cloud_size
-        if sum(cloud[:,point].^2) > radius_sq
+        if sum(cloud[:,point].^2) > 1
             val = abs(cloud[1, point])
-            range_val = Uniform(val, radius)
+            range_val = Uniform(val, 1)
             new_val = rand(range_val)
             y = sqrt(new_val - val^2)
-            cloud[2, point] = y  #rand(-1:2:1) * sqrt(radius_sq -
-                                #    (rand(Uniform(-abs(cloud[1, point]),
-                                #                    abs(cloud[1, point]))))^2)
-            # cloud[1, point] = rand(Uniform(-random_radius[point],random_radius[point]))
-            # new_matrix[:,point] ./= 2
+            cloud[2, point] = y
         end
     end
     cloud .*= rand!(zeros(dims, cloud_size), -1:2:1)
@@ -53,9 +53,9 @@ end
 
 
 
-random_circle = restric_to_circle(random_matrix)
+random_circle = restric_to_circle(random_matrix, center = my_center, radius=my_radius)
 plot(random_circle[1,:], random_circle[2,:],seriestype=:scatter,
-    title="circle matrx",xlims = (-1,1), ylims = (-1,1))
+    title="circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
 
 
 
@@ -90,11 +90,13 @@ my_new_matrx = set_range(random_matrix, -1, 1, val_type = Float64)
 
 
 
-if plot_figures
 
 
-end
 
+
+
+
+# This does not generate uniform distribution as the values arebounded to one another
 function generate_circle_cloud(cloud_size =100 ;min_vals=(x=-1, y=-1), max_vals=(x=1, y=1),
                                                          cloud_dim=2)
 
@@ -126,7 +128,5 @@ function generate_circle_cloud(cloud_size =100 ;min_vals=(x=-1, y=-1), max_vals=
 
     return cloud
 end
-
 circle_cloud = generate_circle_cloud(1000);
-
 plot(circle_cloud[1,:], circle_cloud[2,:],seriestype=:scatter,title="circle matrx")
