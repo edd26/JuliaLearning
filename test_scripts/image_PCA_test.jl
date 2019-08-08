@@ -53,11 +53,11 @@ train_size = 150
    Xr = reconstruct(M, Yte)
 # Plot the results
 
-image_number = 20
+frame_number = 20
 
-reconstructed_img = reshape(Xr[:,image_number], size_x, size_y)
+reconstructed_img = reshape(Xr[:,frame_number], size_x, size_y)
 plotimg(reconstructed_img)
-plotimg(video_array[image_number])
+plotimg(video_array[frame_number])
 
 
 
@@ -68,15 +68,17 @@ using FFTW
 
 
 # Using FFT method creates artifacts, which may be hatmful for the segmentation
-image_number = 1
-fft_result = fft(vectorized_video[:,image_number])
+frame_number = 1
+fft_result = fft(vectorized_video[:,frame_number])
 
 fft_mag = abs.(fft_result)
 half_size = Int(floor(size(fft_mag)[1]/2))
 
 plot(fft_mag[1:half_size], yaxis=:log)
 
-fft_result = fft(Xr[:,image_number])
+
+
+fft_result = fft(Xr[:,frame_number])
 
 fft_mag = abs.(fft_result)
 half_size = Int(floor(size(fft_mag)[1]/2))
