@@ -5,12 +5,72 @@ using Distributions
 plot_figures = false
 
 # rng = MersenneTwister(1234);
-rng = MersenneTwister();
 
-cloud_size = 100
+cloud_size = 1000
 cloud_dim = 2
 random_matrix = zeros(Float64, cloud_dim, cloud_size)
-rand!(rng, random_matrix)
+rand!(random_matrix)
+
+plot(random_matrix[1,:], random_matrix[2,:],seriestype=:scatter,title="random_matrix")
+
+
+my_matrix = random_matrix
+
+#=
+This functin is not generating uniform distribution, as the elements outside the
+radius are mapped to the values near the border of the radius, as they are
+distributed for a smaller field.
+
+In other words, the distribution from outside the radius are mapped to the
+border values of the circle. 
+=#
+function restric_to_circle(my_matrix; center=(x=0, y=0), radius = 1)
+    cloud = copy(my_matrix)
+    # Add handing input matrix from range different from [-1,1]
+
+    dims, cloud_size = size(cloud)
+    radius_sq = radius^2
+
+    for point = 1:cloud_size
+        if sum(cloud[:,point].^2) > radius_sq
+            val = abs(cloud[1, point])
+            range_val = Uniform(val, radius)
+            new_val = rand(range_val)
+            y = sqrt(new_val - val^2)
+            cloud[2, point] = y  #rand(-1:2:1) * sqrt(radius_sq -
+                                #    (rand(Uniform(-abs(cloud[1, point]),
+                                #                    abs(cloud[1, point]))))^2)
+            # cloud[1, point] = rand(Uniform(-random_radius[point],random_radius[point]))
+            # new_matrix[:,point] ./= 2
+        end
+    end
+    cloud .*= rand!(zeros(dims, cloud_size), -1:2:1)
+    cloud .*= radius
+    cloud[1,:] .+= center.x
+    cloud[2,:] .+= center.y
+    return cloud
+end
+
+
+
+random_circle = restric_to_circle(random_matrix)
+plot(random_circle[1,:], random_circle[2,:],seriestype=:scatter,
+    title="circle matrx",xlims = (-1,1), ylims = (-1,1))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function set_range(my_matrix, min_val, max_val; val_type = Int)
     values_range = max_val - min_val
@@ -26,53 +86,12 @@ function set_range(my_matrix, min_val, max_val; val_type = Int)
     return new_matrix
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 my_new_matrx = set_range(random_matrix, -1, 1, val_type = Float64)
 
-function restric_to_circle(my_matrix; radius = 1)
-    new_matrix = my_matrix
-    # Add handing input matrix from range different from [-1,1]
 
-    dims, cloud_size = size(new_matrix)
-    radius_sq = radius^2
-
-    for point = 1:cloud_size
-        if sum(new_matrix[:,point].^2) > radius_sq
-            new_matrix[2, point] = rand(-1:2:1) * sqrt(radius_sq -
-                                    (rand(Uniform(-abs(new_matrix[1, point]),
-                                                    abs(new_matrix[1, point]))))^2)
-            # cloud[1, point] = rand(Uniform(-random_radius[point],random_radius[point]))
-            # new_matrix[:,point] ./= 2
-        end
-    end
-    return new_matrix
-end
-
-random_circle = restric_to_circle(my_new_matrx)
-plot(random_circle[1,:], random_circle[2,:],seriestype=:scatter,title="circle matrx")
 
 if plot_figures
-    plot(my_new_matrx[1,:], my_new_matrx[2,:],seriestype=:scatter,title="my_new_matrx")
+
 
 end
 
