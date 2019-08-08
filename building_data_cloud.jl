@@ -6,19 +6,15 @@ plot_figures = false
 
 # rng = MersenneTwister(1234);
 
-cloud_size = 1000
+cloud_size = 10000
 cloud_dim = 2
 random_matrix = zeros(Float64, cloud_dim, cloud_size)
 rand!(random_matrix)
 
 plot(random_matrix[1,:], random_matrix[2,:],seriestype=:scatter,title="random_matrix")
 
+# my_matrix = random_matrix
 
-my_matrix = random_matrix
-my_center = (x=0, y=0)
-my_radius = 2
-my_limits = (xlim = (my_center.x-my_radius, my_center.x+my_radius),
-                ylim = (my_center.y-my_radius, my_center.y+my_radius))
 
     #=
     This functin is not generating uniform distribution, as the elements outside the
@@ -28,7 +24,7 @@ my_limits = (xlim = (my_center.x-my_radius, my_center.x+my_radius),
     In other words, the distribution from outside the radius are mapped to the
     border values of the circle.
     =#
-function restric_to_circle(my_matrix; center=(x=0, y=0), radius = 1)
+function form_circle(my_matrix; center=(x=0, y=0), radius = 1)
     cloud = copy(my_matrix)
     # Add handing input matrix from range different from [-1,1]
 
@@ -69,7 +65,7 @@ function restric_from_area(my_matrix; center=(x=0, y=0), radius = 1.)
     end
 
 
-    all_non_zeros = findall(x -> x==0, cloud)[1:2:end]
+    all_non_zeros = findall(x -> x!=0, cloud)[1:2:end]
     indices = zeros(Int, 1, size(all_non_zeros)[1])
 
     for k=1:size(all_non_zeros)[1]
@@ -80,20 +76,49 @@ function restric_from_area(my_matrix; center=(x=0, y=0), radius = 1.)
     return cloud
 end
 
+function symetric_removal(cloud, x_val, y_val, rad)
+    x = abs(x_val)
+    y = abs(y_val)
+    # cloud = restric_from_area(cloud, center=(x=x_val,y=y_val), radius=rad)
+    # cloud = restric_from_area(cloud, center=(x=-x_val,y=y_val), radius=rad)
+    # cloud = restric_from_area(cloud, center=(x=x_val,y=-y_val), radius=rad)
+    # cloud = restric_from_area(cloud, center=(x=-x_val,y=-y_val), radius=rad)
+
+    for k=-1:2:1
+        for l=-1:2:1
+            cloud = restric_from_area(cloud, center=(x=x_val*k,y=y_val*l),
+                                                                    radius=rad)
+        end
+    end
+    return cloud
+end
+
+my_center = (x=0, y=0)
+my_radius = 2
+my_limits = (xlim = (my_center.x-my_radius, my_center.x+my_radius),
+                ylim = (my_center.y-my_radius, my_center.y+my_radius))
+
+random_circle = form_circle(random_matrix, center = my_center, radius=my_radius)
+
+random_circle_mod = restric_from_area(random_circle; center=(x=1, y=0), radius = 2)
+
+random_circle_mod_sym = symetric_removal(random_circle, 0.5, 0.5, 0.25)
 
 
-random_circle = restric_to_circle(random_matrix, center = my_center, radius=my_radius)
+plot(random_matrix[1,:], random_matrix[2,:],seriestype=:scatter,title="random_matrix")
 plot(random_circle[1,:], random_circle[2,:],seriestype=:scatter,
     title="circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
+# plot(random_circle_mod[1,:], random_circle_mod[2,:],seriestype=:scatter,
+#     title="Holed circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
+plot(random_circle_mod_sym[1,:], random_circle_mod_sym[2,:],seriestype=:scatter,
+    title="Sym. holed circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
 
-random_circle_mod = restric_from_area(random_matrix, center = my_center, radius=0.5)
-plot(random_circle_mod[1,:], random_circle_mod[2,:],seriestype=:scatter,
-    title="circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
+letfovers = size(random_circle_mod_sym)[2]
+subsample_size = 100
+subsampled_circle = random_circle[:, shuffle(1:letfovers)[1:subsample_size]]
 
-
-
-
-
+plot(subsampled_circle[1,:], subsampled_circle[2,:],seriestype=:scatter,
+    title="Subsample circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
 
 
 
