@@ -52,9 +52,42 @@ function restric_to_circle(my_matrix; center=(x=0, y=0), radius = 1)
 end
 
 
+#= Remove values which are in the given circle
+=#
+function restric_from_area(my_matrix; center=(x=0, y=0), radius = 1.)
+    cloud = copy(my_matrix)
+    # Add handing input matrix from range different from [-1,1]
+
+    dims, cloud_size = size(cloud)
+    radius_sq = radius^2
+
+    for pt = 1:cloud_size
+        if (cloud[1,pt] > center.x-radius && cloud[1,pt] < center.x+radius) &&
+            (cloud[2,pt] > center.y-radius && cloud[2,pt] < center.y+radius)
+            cloud[:,pt] = zeros(2,1)
+        end
+    end
+
+
+    all_non_zeros = findall(x -> x==0, cloud)[1:2:end]
+    indices = zeros(Int, 1, size(all_non_zeros)[1])
+
+    for k=1:size(all_non_zeros)[1]
+        indices[k] = Int(all_non_zeros[k][2])
+    end
+
+    cloud = cloud[:,indices[1,:]]
+    return cloud
+end
+
+
 
 random_circle = restric_to_circle(random_matrix, center = my_center, radius=my_radius)
 plot(random_circle[1,:], random_circle[2,:],seriestype=:scatter,
+    title="circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
+
+random_circle_mod = restric_from_area(random_matrix, center = my_center, radius=0.5)
+plot(random_circle_mod[1,:], random_circle_mod[2,:],seriestype=:scatter,
     title="circle matrx",xlims = my_limits.xlim, ylims = my_limits.ylim)
 
 
