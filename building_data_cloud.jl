@@ -125,11 +125,6 @@ plot(subsampled_circle[1,:], subsampled_circle[2,:],seriestype=:scatter,
 
 
 
-
-
-
-
-
 function set_range(my_matrix, min_val, max_val; val_type = Int)
     values_range = max_val - min_val
     new_matrix = abs.(my_matrix)
