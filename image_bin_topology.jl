@@ -3,6 +3,7 @@ using ImageFeatures
  using Images
  # ImageDraw,
  # CoordinateTransformations
+ using ImageSegmentation
  using Plots
 
  include("VideoProcessing.jl")
