@@ -5,6 +5,7 @@ using ImageFeatures
  # CoordinateTransformations
  using ImageSegmentation
  using Plots
+ using Random
 
  include("VideoProcessing.jl")
 
@@ -45,7 +46,7 @@ segments1 = meanshift(img1, 16, 15/255)
 
 
 # parameters are smoothing radii: spatial=16, intensity-wise=8/255
-plot_img ? imshow(map(i->segment_mean(segments,i), labels_map(segments))) : ()
+plot_img ? imshow(map(i->segment_mean(segments,i), labels_map(segments))) : (1)
 
 function get_random_color(seed)
     Random.seed!(seed)
