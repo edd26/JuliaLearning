@@ -7,6 +7,7 @@ using Images, ImageView
    using Distances
    using Eirene
    include("julia-functions/BettiCurves.jl")
+	include("julia-functions/MatrixProcessing.jl")
 
 plot_img = false
 
@@ -75,10 +76,11 @@ my_maxdim = 2
 distance_matrix = pairwise(Euclidean(), data_matrix, dims=2)
 distance_matrix ./= findmax(distance_matrix)[1]
 
+ordered_matrix = get_ordered_matrix(distance_matrix)
 
 # ===========================
 # === Eirene computations ===
-R = eirene(distance_matrix,maxdim=3,model="vr")
+R = eirene(ordered_matrix,maxdim=3,model="vr")
 
 ref = plot_and_save_bettis(R, "Eirene results for segmentation",
 								"results/"; do_save=false, extend_title=false,
