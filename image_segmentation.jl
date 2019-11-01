@@ -5,6 +5,8 @@ using Images, ImageView
    using Statistics
    using MATLAB
    using Distances
+   using Eirene
+   include("julia-functions/BettiCurves.jl")
 
 plot_img = false
 
@@ -14,7 +16,7 @@ img = Gray.(load("img/checkerboard.png"))
 imgg = imfilter(img, Kernel.gaussian(1));
    plot_img ? imshow(imgg) : ()
 
-# Method below takes a lot of time time but returns multiple segments
+# Method below takes a lot of time to compute but returns multiple segments
 segments = meanshift(imgg, 16, 10/255)
  # parameters are smoothing radii: spatial=16, intensity-wise=8/255
     plot_img ? imshow(map(i->segment_mean(segments,i), labels_map(segments))) : ()
@@ -73,6 +75,14 @@ my_maxdim = 2
 distance_matrix = pairwise(Euclidean(), data_matrix, dims=2)
 distance_matrix ./= findmax(distance_matrix)[1]
 
+
+# ===========================
+# === Eirene computations ===
+R = eirene(distance_matrix,maxdim=3,model="vr")
+
+ref = plot_and_save_bettis(R, "Eirene results for segmentation",
+								"results/"; do_save=false, extend_title=false,
+								do_normalise=false, max_dim=3,legend_on=true)
 
 # clique-top computations
 betti_num = 0
