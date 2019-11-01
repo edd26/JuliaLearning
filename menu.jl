@@ -36,14 +36,14 @@ function get_menu_item_from_usr(max_range)
 end
 
 """
- Gets the input from the console.
+Gets the input from the console.
 
- Input is sent to the program after hiting enter.
- """
+Input is sent to the program after hiting enter.
+"""
 get_input_from_usr() = readline(stdin)
 
 """
- """
+"""
 function validate_the_input(usr_input, max_range)
     @debug "Running validate_the_input with params: " usr_input, max_range
     usr_input = remove_dots(usr_input)
@@ -71,8 +71,8 @@ function validate_the_input(usr_input, max_range)
 end
 
 """
- Removes dots from the input text.
- """
+Removes dots from the input text.
+"""
 remove_dots(some_txt) = replace(some_txt, "."=>"")
 
 
@@ -128,8 +128,8 @@ function launch_menu(menu_name)
 end
 
 """
- Empty function
- """
+Empty function
+"""
 function proceed()
 end
 
