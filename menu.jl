@@ -1,6 +1,6 @@
 include("Settings.jl")
 
-function startmenu(;debug=false)
+function start_menu(;debug=false)
     # TODO check for dependencies and then inlude the settings
     if debug
         ENV["JULIA_DEBUG"] = "all"
@@ -31,7 +31,8 @@ end
 
 function get_menu_item_from_usr(max_range)
     @debug "Running get_menu_item_from_usr with param: " max_range
-    usr_input = get_input_from_usr()    action = validate_the_input(usr_input, max_range)
+    usr_input = get_input_from_usr()
+    action = validate_the_input(usr_input, max_range)
     return action
 end
 
