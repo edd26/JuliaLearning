@@ -6,12 +6,14 @@ using ImageFeatures
  using ImageSegmentation
  using Plots
  using Random
+ using ImageView
+ using Statistics
 
  include("VideoProcessing.jl")
 
 plot_img = true
 
-init_img = load("img/RT6_6.png")
+init_img = load("img/candle.png")
 # init_img = testimage("lighthouse")
 img1 = Gray.(init_img)
 
@@ -71,7 +73,7 @@ seg_centers = zeros(Float64, 3, regions_count)
 seg_data = Dict()
 seg_mean = segment_mean(segments)
 
-
+img=img1
 for segment in segment_labels(segments)
    if seg_pix_count[segment] > size_threshold
       index_set = findall(x->x==segment, seg_map)
@@ -107,6 +109,7 @@ for element in seg_data
    global counter +=1
 end
 data_matrix = zeros(6, length(segments))
+segments.image_indexmap
 
 counter = 1
 for element in seg_data
